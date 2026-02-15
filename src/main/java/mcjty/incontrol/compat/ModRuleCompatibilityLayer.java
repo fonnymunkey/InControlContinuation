@@ -1,5 +1,6 @@
 package mcjty.incontrol.compat;
 
+import mcjty.incontrol.mixin.BiomeAccessor;
 import mcjty.incontrol.setup.ModSetup;
 import mcjty.tools.rules.IEventQuery;
 import mcjty.tools.rules.IModRuleCompatibilityLayer;
@@ -152,6 +153,6 @@ public class ModRuleCompatibilityLayer implements IModRuleCompatibilityLayer {
 
     @Override
     public String getBiomeName(Biome biome) {
-        return biome.biomeName;
+        return ((BiomeAccessor)biome).getBiomeNameSafe();
     }
 }

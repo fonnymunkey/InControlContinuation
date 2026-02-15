@@ -1,7 +1,6 @@
 package mcjty.incontrol.setup;
 
 import mcjty.incontrol.ForgeEventHandlers;
-import mcjty.incontrol.compat.EnigmaSupport;
 import mcjty.incontrol.compat.LostCitySupport;
 import mcjty.incontrol.config.ConfigSetup;
 import mcjty.incontrol.rules.RuleCache;
@@ -20,7 +19,6 @@ public class ModSetup {
     public static boolean gamestages = false;
     public static boolean sereneSeasons = false;
     public static boolean baubles = false;
-    public static boolean enigma = false;
 
     private Logger logger;
     public RuleCache cache = new RuleCache();
@@ -45,7 +43,6 @@ public class ModSetup {
         gamestages = Loader.isModLoaded("gamestages");
         sereneSeasons = Loader.isModLoaded("sereneseasons");
         baubles = Loader.isModLoaded("baubles");
-        enigma = Loader.isModLoaded("enigma");
 
         if (ModSetup.lostcities) {
             LostCitySupport.register();
@@ -59,10 +56,6 @@ public class ModSetup {
         }
         if (ModSetup.baubles) {
             logger.log(Level.INFO, "Enabling support for Baubles");
-        }
-        if (ModSetup.enigma) {
-            EnigmaSupport.register();
-            logger.log(Level.INFO, "Enabling support for EnigmaScript");
         }
     }
 

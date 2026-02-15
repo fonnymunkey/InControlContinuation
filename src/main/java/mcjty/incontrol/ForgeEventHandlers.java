@@ -1,5 +1,6 @@
 package mcjty.incontrol;
 
+import mcjty.incontrol.mixin.BiomeAccessor;
 import mcjty.incontrol.rules.*;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.item.EntityItem;
@@ -83,7 +84,7 @@ public class ForgeEventHandlers {
                     InControl.setup.getLogger().log(Level.INFO, "Rule " + i + ": " + result
                             + " entity: " + event.getEntity().getName()
                             + " y: " + event.getY()
-                            + " biome: " + event.getWorld().getBiome(new BlockPos(event.getX(), event.getY(), event.getZ())).biomeName);
+                            + " biome: " + ((BiomeAccessor)event.getWorld().getBiome(new BlockPos(event.getX(), event.getY(), event.getZ()))).getBiomeNameSafe());
                 }
                 if (result != null) {
                     event.setResult(result);
@@ -107,7 +108,7 @@ public class ForgeEventHandlers {
                     InControl.setup.getLogger().log(Level.INFO, "SummonAid " + i + ": " + result
                             + " entity: " + event.getEntity().getName()
                             + " y: " + event.getY()
-                            + " biome: " + event.getWorld().getBiome(new BlockPos(event.getX(), event.getY(), event.getZ())).biomeName);
+                            + " biome: " + ((BiomeAccessor)event.getWorld().getBiome(new BlockPos(event.getX(), event.getY(), event.getZ()))).getBiomeNameSafe());
                 }
                 event.setResult(result);
                 if (result != Event.Result.DENY) {
