@@ -128,10 +128,13 @@ public class ForgeEventHandlers {
             if (rule.match(event)) {
 
                 // First remove mob entries if needed
-                for (Class clazz : rule.getToRemoveMobs()) {
-                    for (int idx = event.getList().size() - 1; idx >= 0; idx--) {
-                        if (event.getList().get(idx).entityClass == clazz) {
-                            event.getList().remove(idx);
+                if(rule.shouldRemoveAll()) event.getList().clear();
+                else {
+                    for (Class<?> clazz : rule.getToRemoveMobs()) {
+                        for (int idx = event.getList().size() - 1; idx >= 0; idx--) {
+                            if (event.getList().get(idx).entityClass == clazz) {
+                                event.getList().remove(idx);
+                            }
                         }
                     }
                 }

@@ -12,6 +12,7 @@ import mcjty.tools.typed.AttributeMap;
 import mcjty.tools.typed.GenericAttributeMapFactory;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -112,9 +113,12 @@ public class PotentialSpawnRule extends RuleBase<RuleBase.EventGetter> {
                 .attribute(Attribute.create(BLOCKOFFSET))
                 .attribute(Attribute.createMulti(BIOME))
                 .attribute(Attribute.createMulti(BIOMETYPE))
+                .attribute(Attribute.createMulti(BIOME_REG))
                 .attribute(Attribute.createMulti(DIMENSION))
 
                 .attribute(Attribute.createMulti(ACTION_REMOVE_MOBS))
+                
+                .attribute(Attribute.create(ENUM_CREATURE_TYPE))
         ;
 
         MOB_FACTORY
@@ -126,8 +130,10 @@ public class PotentialSpawnRule extends RuleBase<RuleBase.EventGetter> {
     }
 
     private final GenericRuleEvaluator ruleEvaluator;
-    private List<Biome.SpawnListEntry> spawnEntries = new ArrayList<>();
-    private List<Class> toRemoveMobs = new ArrayList<>();
+    private final List<Biome.SpawnListEntry> spawnEntries = new ArrayList<>();
+    private final List<Class<?>> toRemoveMobs = new ArrayList<>();
+    private boolean removeAll = false;
+    private EnumCreatureType creatureType = null;
 
     private PotentialSpawnRule(AttributeMap map) {
         super(InControl.setup.getLogger());
@@ -138,6 +144,11 @@ public class PotentialSpawnRule extends RuleBase<RuleBase.EventGetter> {
             InControl.setup.getLogger().log(Level.ERROR, "No 'mobs' or 'remove' specified!");
             return;
         }
+        
+        if (map.has(ENUM_CREATURE_TYPE)) {
+            setCreatureType(map.get(ENUM_CREATURE_TYPE));
+        }
+        
         makeSpawnEntries(map);
         if (map.has(ACTION_REMOVE_MOBS)) {
             addToRemoveAction(map);
@@ -172,18 +183,31 @@ public class PotentialSpawnRule extends RuleBase<RuleBase.EventGetter> {
             return new PotentialSpawnRule(map);
         }
     }
+    
+    private void setCreatureType(String name) {
+        if(name == null || name.isEmpty()) return;
+        try {
+			this.creatureType = EnumCreatureType.valueOf(name);
+        }
+        catch(Exception ex) {
+            InControl.setup.getLogger().log(Level.ERROR, "Invalid creature type '" + name + "'!");
+        }
+    }
 
     private void addToRemoveAction(AttributeMap map) {
         List<String> toremove = map.getList(ACTION_REMOVE_MOBS);
-        for (String s : toremove) {
-            String id = fixEntityId(s);
-            EntityEntry entry = ForgeRegistries.ENTITIES.getValue(new ResourceLocation(id));
-            Class<? extends Entity> clazz = entry == null ? null : entry.getEntityClass();
-            if (clazz == null) {
-                InControl.setup.getLogger().log(Level.ERROR, "Cannot find mob '" + s + "'!");
-                return;
+        if(toremove.size() == 1 && toremove.get(0).equals("*")) this.removeAll = true;
+        else {
+            for (String s : toremove) {
+                String id = fixEntityId(s);
+                EntityEntry entry = ForgeRegistries.ENTITIES.getValue(new ResourceLocation(id));
+                Class<? extends Entity> clazz = entry == null ? null : entry.getEntityClass();
+                if (clazz == null) {
+                    InControl.setup.getLogger().log(Level.ERROR, "Cannot find mob '" + s + "'!");
+                    return;
+                }
+                toRemoveMobs.add(clazz);
             }
-            toRemoveMobs.add(clazz);
         }
     }
 
@@ -216,10 +240,17 @@ public class PotentialSpawnRule extends RuleBase<RuleBase.EventGetter> {
     }
 
     public boolean match(WorldEvent.PotentialSpawns event) {
-        return ruleEvaluator.match(event, EVENT_QUERY);
+        if(this.creatureType == null || this.creatureType == event.getType()) {
+            return ruleEvaluator.match(event, EVENT_QUERY);
+        }
+        return false;
+    }
+    
+    public boolean shouldRemoveAll() {
+        return this.removeAll;
     }
 
-    public List<Class> getToRemoveMobs() {
+    public List<Class<?>> getToRemoveMobs() {
         return toRemoveMobs;
     }
 }

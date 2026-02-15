@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static mcjty.incontrol.rules.support.RuleKeys.*;
 
@@ -47,37 +48,24 @@ public class GenericRuleEvaluator extends CommonRuleEvaluator {
 
     @Override
     protected void addChecks(AttributeMap map) {
-        super.addChecks(map);
-
         if (map.has(HOSTILE)) {
             addHostileCheck(map);
         }
         if (map.has(PASSIVE)) {
             addPassiveCheck(map);
         }
-
-        if (map.has(CANSPAWNHERE)) {
-            addCanSpawnHereCheck(map);
-        }
-        if (map.has(NOTCOLLIDING)) {
-            addNotCollidingCheck(map);
-        }
+        
         if (map.has(SPAWNER)) {
             addSpawnerCheck(map);
         }
-
-        if (map.has(MOB)) {
-            addMobsCheck(map);
-        }
+        
         if (map.has(PLAYER)) {
             addPlayerCheck(map);
         }
-        if (map.has(REALPLAYER)) {
-            addRealPlayerCheck(map);
+        if (map.has(MOB)) {
+            addMobsCheck(map);
         }
-        if (map.has(FAKEPLAYER)) {
-            addFakePlayerCheck(map);
-        }
+        
         if (map.has(EXPLOSION)) {
             addExplosionCheck(map);
         }
@@ -90,9 +78,29 @@ public class GenericRuleEvaluator extends CommonRuleEvaluator {
         if (map.has(MAGIC)) {
             addMagicCheck(map);
         }
-
+        
+        super.addChecks(map);
+        
+        if (map.has(BIOME_REG)) {
+            addBiomeRegCheck(map);
+        }
+        
         if (map.has(SOURCE)) {
             addSourceCheck(map);
+        }
+        
+        if (map.has(CANSPAWNHERE)) {
+            addCanSpawnHereCheck(map);
+        }
+        if (map.has(NOTCOLLIDING)) {
+            addNotCollidingCheck(map);
+        }
+
+        if (map.has(REALPLAYER)) {
+            addRealPlayerCheck(map);
+        }
+        if (map.has(FAKEPLAYER)) {
+            addFakePlayerCheck(map);
         }
         if (map.has(MOD)) {
             addModsCheck(map);
@@ -102,6 +110,23 @@ public class GenericRuleEvaluator extends CommonRuleEvaluator {
         }
         if (map.has(MAXCOUNT)) {
             addMaxCountCheck(map);
+        }
+    }
+    
+    private void addBiomeRegCheck(AttributeMap map) {
+        List<String> regs = map.getList(BIOME_REG);
+        if (regs.size() == 1) {
+            ResourceLocation biomeLoc = new ResourceLocation(regs.get(0));
+            checks.add((event, query) -> {
+                ResourceLocation targetReg = query.getWorld(event).getBiome(query.getPos(event)).getRegistryName();
+                return biomeLoc.equals(targetReg);
+            });
+        } else {
+            Set<ResourceLocation> biomeLocs = regs.stream().map(ResourceLocation::new).collect(Collectors.toCollection(HashSet::new));
+            checks.add((event, query) -> {
+                ResourceLocation targetReg = query.getWorld(event).getBiome(query.getPos(event)).getRegistryName();
+                return biomeLocs.contains(targetReg);
+            });
         }
     }
 

@@ -37,7 +37,10 @@ public interface RuleKeys extends CommonRuleKeys {
     Key<Integer> ACTION_SETXP = Key.create(Type.INTEGER, "setxp");
     Key<Float> ACTION_MULTXP = Key.create(Type.FLOAT, "multxp");
     Key<Float> ACTION_ADDXP = Key.create(Type.FLOAT, "addxp");
-
+    
+    Key<String> BIOME_REG = Key.create(Type.STRING, "biomereg");
+    Key<String> ENUM_CREATURE_TYPE = Key.create(Type.STRING, "creaturetype");
+    
     // Mob spawn entry
     Key<AttributeMap> ACTION_MOBS = Key.create(Type.MAP, "mobs");
     Key<String> ACTION_REMOVE = Key.create(Type.JSON, "remove");

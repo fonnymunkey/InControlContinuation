@@ -128,6 +128,7 @@ public class LootRule extends RuleBase<RuleBase.EventGetter> {
                 .attribute(Attribute.create(BLOCKOFFSET))
                 .attribute(Attribute.createMulti(BIOME))
                 .attribute(Attribute.createMulti(BIOMETYPE))
+                .attribute(Attribute.createMulti(BIOME_REG))
                 .attribute(Attribute.createMulti(DIMENSION))
                 .attribute(Attribute.createMulti(SOURCE))
                 .attribute(Attribute.createMulti(HELMET))
