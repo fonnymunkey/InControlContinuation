@@ -118,7 +118,7 @@ public class PotentialSpawnRule extends RuleBase<RuleBase.EventGetter> {
         ;
 
         MOB_FACTORY
-                .attribute(Attribute.create(MOB_NAME))
+                .attribute(Attribute.createMulti(MOB_NAME))
                 .attribute(Attribute.create(MOB_WEIGHT))
                 .attribute(Attribute.create(MOB_GROUPCOUNTMIN))
                 .attribute(Attribute.create(MOB_GROUPCOUNTMAX))
@@ -188,30 +188,26 @@ public class PotentialSpawnRule extends RuleBase<RuleBase.EventGetter> {
     }
 
     private void makeSpawnEntries(AttributeMap map) {
-        for (AttributeMap mobMap : map.getList(ACTION_MOBS)) {
-            String id = fixEntityId(mobMap.get(MOB_NAME));
-            EntityEntry ee = ForgeRegistries.ENTITIES.getValue(new ResourceLocation(id));
-            Class<? extends Entity> clazz = ee == null ? null : ee.getEntityClass();
-            if (clazz == null) {
-                InControl.setup.getLogger().log(Level.ERROR, "Cannot find mob '" + mobMap.get(MOB_NAME) + "'!");
-                return;
-            }
-
+        for(AttributeMap mobMap : map.getList(ACTION_MOBS)) {
+            List<String> mobs = mobMap.getList(MOB_NAME);
             Integer weight = mobMap.get(MOB_WEIGHT);
-            if (weight == null) {
-                weight = 1;
-            }
+            if(weight == null) weight = 1;
             Integer groupCountMin = mobMap.get(MOB_GROUPCOUNTMIN);
-            if (groupCountMin == null) {
-                groupCountMin = 1;
-            }
+            if(groupCountMin == null) groupCountMin = 1;
             Integer groupCountMax = mobMap.get(MOB_GROUPCOUNTMAX);
-            if (groupCountMax == null) {
-                groupCountMax = Math.max(groupCountMin, 1);
+            if(groupCountMax == null) groupCountMax = Math.max(groupCountMin, 1);
+            
+            for(String mob : mobs) {
+                String id = fixEntityId(mob);
+                EntityEntry ee = ForgeRegistries.ENTITIES.getValue(new ResourceLocation(id));
+                Class<? extends Entity> clazz = ee == null ? null : ee.getEntityClass();
+                if(clazz == null) {
+                    InControl.setup.getLogger().log(Level.ERROR, "Cannot find mob '{}'!", mob);
+                    continue;
+                }
+                Biome.SpawnListEntry entry = new Biome.SpawnListEntry((Class<? extends EntityLiving>) clazz, weight, groupCountMin, groupCountMax);
+                spawnEntries.add(entry);
             }
-            Biome.SpawnListEntry entry = new Biome.SpawnListEntry((Class<? extends EntityLiving>) clazz,
-                    weight, groupCountMin, groupCountMax);
-            spawnEntries.add(entry);
         }
     }
 
