@@ -18,6 +18,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.util.FakePlayer;
@@ -87,6 +88,14 @@ public class GenericRuleEvaluator extends CommonRuleEvaluator {
         
         if (map.has(SOURCE)) {
             addSourceCheck(map);
+        }
+        
+        if (map.has(MINPLAYERDIST)) {
+            addMinPlayerDistCheck(map);
+        }
+        
+        if (map.has(MAXPLAYERDIST)) {
+            addMaxPlayerDistCheck(map);
         }
         
         if (map.has(CANSPAWNHERE)) {
@@ -609,6 +618,22 @@ public class GenericRuleEvaluator extends CommonRuleEvaluator {
                 return false;
             }
             return sourceSet.contains(query.getSource(event).getDamageType());
+        });
+    }
+    
+    private void addMinPlayerDistCheck(AttributeMap map) {
+        final Float d = map.get(MINPLAYERDIST);
+        checks.add((event,query) -> {
+            BlockPos pos = query.getPos(event);
+            return !query.getWorld(event).isAnyPlayerWithinRangeAt(pos.getX(), pos.getY(), pos.getZ(), d);
+        });
+    }
+    
+    private void addMaxPlayerDistCheck(AttributeMap map) {
+        final Float d = map.get(MAXPLAYERDIST);
+        checks.add((event,query) -> {
+            BlockPos pos = query.getPos(event);
+            return query.getWorld(event).isAnyPlayerWithinRangeAt(pos.getX(), pos.getY(), pos.getZ(), d);
         });
     }
 

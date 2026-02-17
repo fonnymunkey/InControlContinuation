@@ -106,6 +106,8 @@ public class SummonAidRule extends RuleBase<SummonEventGetter> {
                 .attribute(Attribute.create(MAXDIFFICULTY))
                 .attribute(Attribute.create(MINSPAWNDIST))
                 .attribute(Attribute.create(MAXSPAWNDIST))
+                .attribute(Attribute.create(MINPLAYERDIST))
+                .attribute(Attribute.create(MAXPLAYERDIST))
                 .attribute(Attribute.create(RANDOM))
                 .attribute(Attribute.create(CANSPAWNHERE))
                 .attribute(Attribute.create(NOTCOLLIDING))

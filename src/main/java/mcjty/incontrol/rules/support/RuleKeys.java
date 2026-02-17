@@ -10,6 +10,8 @@ public interface RuleKeys extends CommonRuleKeys {
     // Inputs
     Key<String> MINCOUNT = Key.create(Type.JSON, "mincount");
     Key<String> MAXCOUNT = Key.create(Type.JSON, "maxcount");
+    Key<Float> MINPLAYERDIST = Key.create(Type.FLOAT, "minplayerdist");
+    Key<Float> MAXPLAYERDIST = Key.create(Type.FLOAT, "maxplayerdist");
     Key<Boolean> CANSPAWNHERE = Key.create(Type.BOOLEAN, "canspawnhere");
     Key<Boolean> NOTCOLLIDING = Key.create(Type.BOOLEAN, "notcolliding");
     Key<Boolean> PASSIVE = Key.create(Type.BOOLEAN, "passive");
