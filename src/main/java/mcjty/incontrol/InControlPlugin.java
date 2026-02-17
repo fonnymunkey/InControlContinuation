@@ -1,5 +1,6 @@
 package mcjty.incontrol;
 
+import com.llamalad7.mixinextras.MixinExtrasBootstrap;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
 import org.spongepowered.asm.launch.MixinBootstrap;
 import org.spongepowered.asm.mixin.Mixins;
@@ -12,6 +13,7 @@ public class InControlPlugin implements IFMLLoadingPlugin {
 	
 	public InControlPlugin() {
 		MixinBootstrap.init();
+		MixinExtrasBootstrap.init();
 		Mixins.addConfiguration("mixins.incontrol.vanilla.json");
 	}
 	

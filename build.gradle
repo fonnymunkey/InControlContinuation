@@ -31,6 +31,8 @@ dependencies {
 
     shadow "org.spongepowered:mixin:${mixin_version}"
     annotationProcessor "org.spongepowered:mixin:${mixin_version}:processor"
+    shadow "io.github.llamalad7:mixinextras-common:${mixin_extras_version}"
+    annotationProcessor "io.github.llamalad7:mixinextras-common:${mixin_extras_version}"
 	
 	implementation fg.deobf("com.github.mcjty:mcjtytools:${mcjtytools_version}")
 	embed ("com.github.mcjty:mcjtytools:${mcjtytools_version}")
