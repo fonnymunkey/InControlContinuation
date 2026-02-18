@@ -3,15 +3,16 @@ package mcjty.incontrol;
 import mcjty.incontrol.mixin.BiomeAccessor;
 import mcjty.incontrol.rules.*;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
-import net.minecraftforge.event.entity.living.LivingDropsEvent;
-import net.minecraftforge.event.entity.living.LivingExperienceDropEvent;
-import net.minecraftforge.event.entity.living.LivingSpawnEvent;
-import net.minecraftforge.event.entity.living.ZombieEvent;
+import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
@@ -221,4 +222,27 @@ public class ForgeEventHandlers {
         }
     }
 
+    @SubscribeEvent
+    public void onLivingHurt(LivingHurtEvent event) {
+        EntityLivingBase entity = event.getEntityLiving();
+        if(entity == null) return;
+        if(entity.world.isRemote) return;
+        
+        NBTTagCompound entityData = entity.getEntityData();
+        if(entityData.hasKey("inctrl_sourcemod", 9)) {
+            NBTTagList resTagList = entityData.getTagList("inctrl_sourcemod", 10);
+            for(NBTBase tag : resTagList) {
+                if(tag instanceof NBTTagCompound) {
+                    NBTTagCompound compTag = (NBTTagCompound)tag;
+                    if(event.getSource().getDamageType().equals(compTag.getString("name"))) {
+                        float m = compTag.hasKey("mult", 99) ? compTag.getFloat("mult") : 1;
+                        float a = compTag.hasKey("add", 99) ? compTag.getFloat("add") : 0;
+                        if(debug) InControl.setup.getLogger().log(Level.INFO, "Source Resistance {}: Mult: {} Add: {} Entity: {}", event.getSource().getDamageType(), m, a, event.getEntity().getName());
+                        event.setAmount(event.getAmount() * m + a);
+                        return;
+                    }
+                }
+            }
+        }
+    }
 }

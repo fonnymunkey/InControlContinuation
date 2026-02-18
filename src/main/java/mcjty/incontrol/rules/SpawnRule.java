@@ -1,6 +1,8 @@
 package mcjty.incontrol.rules;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import mcjty.incontrol.InControl;
 import mcjty.incontrol.compat.ModRuleCompatibilityLayer;
 import mcjty.incontrol.config.GeneralConfiguration;
@@ -17,6 +19,8 @@ import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -25,6 +29,7 @@ import net.minecraftforge.event.entity.living.LivingSpawnEvent;
 import net.minecraftforge.fml.common.eventhandler.Event;
 
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.function.Consumer;
 
 import static mcjty.incontrol.rules.support.RuleKeys.*;
@@ -127,6 +132,7 @@ public class SpawnRule extends RuleBase<RuleBase.EventGetter> {
     };
     
     private static final GenericAttributeMapFactory FACTORY = new GenericAttributeMapFactory();
+    private static final GenericAttributeMapFactory SOURCE_RES_FACTORY = new GenericAttributeMapFactory();
 
     private static EntityPlayer getClosestPlayer(World world, BlockPos pos) {
         return world.getClosestPlayer(pos.getX(), pos.getY(), pos.getZ(), GeneralConfiguration.MAX_PLAYER_DISTANCE, false);
@@ -256,6 +262,12 @@ public class SpawnRule extends RuleBase<RuleBase.EventGetter> {
                 .attribute(Attribute.createMulti(ACTION_ARMORHELMET))
                 .attribute(Attribute.createMulti(ACTION_POTION))
         ;
+        
+        SOURCE_RES_FACTORY
+                .attribute(Attribute.createMulti(SOURCE_NAME))
+                .attribute(Attribute.create(SOURCE_MULT))
+                .attribute(Attribute.create(SOURCE_ADD))
+        ;
     }
 
     private final boolean onJoin;
@@ -272,8 +284,17 @@ public class SpawnRule extends RuleBase<RuleBase.EventGetter> {
     public static SpawnRule parse(JsonElement element) {
         if(element == null) return null;
         else {
+            JsonObject jsonObject = element.getAsJsonObject();
+            boolean onJoin = jsonObject.has("onjoin") && jsonObject.get("onjoin").getAsBoolean();
+            
             AttributeMap map = FACTORY.parse(element);
-            boolean onJoin = element.getAsJsonObject().has("onjoin") && element.getAsJsonObject().get("onjoin").getAsBoolean();
+            if(jsonObject.has("sourcemodifiers")) {
+                JsonArray resistances = jsonObject.get("sourcemodifiers").getAsJsonArray();
+                for(JsonElement res : resistances) {
+                    AttributeMap resMap = SOURCE_RES_FACTORY.parse(res);
+                    map.addList(ACTION_SOURCE_MODIFIERS, resMap);
+                }
+            }
             return new SpawnRule(map, onJoin);
         }
     }
@@ -287,7 +308,9 @@ public class SpawnRule extends RuleBase<RuleBase.EventGetter> {
         if(map.has(ACTION_FLYINGSPEEDMULTIPLY) || map.has(ACTION_FLYINGSPEEDADD)) addFlyingSpeedAction(map);
         if(map.has(ACTION_ARMORMULTIPLY) || map.has(ACTION_ARMORADD)) addArmorAction(map);
         if(map.has(ACTION_ARMORTOUGHNESSMULTIPLY) || map.has(ACTION_ARMORTOUGHNESSADD)) addArmorToughnessAction(map);
-
+        
+        if(map.has(ACTION_SOURCE_MODIFIERS)) addSourceModifiers(map);
+        
         if(map.has(ACTION_RESULT)) {
             String br = map.get(ACTION_RESULT);
             if("default".equals(br) || br.startsWith("def")) this.result = Event.Result.DEFAULT;
@@ -370,6 +393,30 @@ public class SpawnRule extends RuleBase<RuleBase.EventGetter> {
                 }
             }
         });
+    }
+    
+    private void addSourceModifiers(AttributeMap map) {
+        for(AttributeMap resMap : map.getList(ACTION_SOURCE_MODIFIERS)) {
+            List<String> names = resMap.getList(SOURCE_NAME);
+            float m = resMap.has(SOURCE_MULT) ? resMap.get(SOURCE_MULT) : 1;
+            float a = resMap.has(SOURCE_ADD) ? resMap.get(SOURCE_ADD) : 0;
+            
+            for(String name : names) {
+                NBTTagCompound resTag = new NBTTagCompound();
+                resTag.setString("name", name);
+                resTag.setFloat("mult", m);
+                resTag.setFloat("add", a);
+                actions.add(event -> {
+                    EntityLivingBase entityLiving = event.getEntityLiving();
+                    if(entityLiving != null) {
+                        NBTTagCompound dataTag = entityLiving.getEntityData();
+                        NBTTagList listTag = dataTag.getTagList("inctrl_sourcemod", 10);
+                        listTag.appendTag(resTag);
+                        dataTag.setTag("inctrl_sourcemod", listTag);
+                    }
+                });
+            }
+        }
     }
 
     public boolean match(LivingSpawnEvent.CheckSpawn event) {
