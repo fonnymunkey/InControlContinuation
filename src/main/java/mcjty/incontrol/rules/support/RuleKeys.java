@@ -59,4 +59,15 @@ public interface RuleKeys extends CommonRuleKeys {
     Key<Boolean> RED_GIANT = Key.create(Type.BOOLEAN, "redgiant");
     Key<Boolean> GRIM_ECLIPSE = Key.create(Type.BOOLEAN, "grimeclipse");
     Key<Boolean> BLUE_MOON = Key.create(Type.BOOLEAN, "bluemoon");
+    
+    Key<Float> ACTION_FOLLOWRANGEMULTIPLY = Key.create(Type.FLOAT, "followrangemultiply");
+    Key<Float> ACTION_FOLLOWRANGEADD = Key.create(Type.FLOAT, "followrangeadd");
+    Key<Float> ACTION_KNOCKBACKRESISTANCEMULTIPLY = Key.create(Type.FLOAT, "knockbackresistancemultiply");
+    Key<Float> ACTION_KNOCKBACKRESISTANCEADD = Key.create(Type.FLOAT, "knockbackresistanceadd");
+    Key<Float> ACTION_FLYINGSPEEDMULTIPLY = Key.create(Type.FLOAT, "flyingspeedmultiply");
+    Key<Float> ACTION_FLYINGSPEEDADD = Key.create(Type.FLOAT, "flyingspeedadd");
+    Key<Float> ACTION_ARMORMULTIPLY = Key.create(Type.FLOAT, "armormultiply");
+    Key<Float> ACTION_ARMORADD = Key.create(Type.FLOAT, "armoradd");
+    Key<Float> ACTION_ARMORTOUGHNESSMULTIPLY = Key.create(Type.FLOAT, "armortoughnessmultiply");
+    Key<Float> ACTION_ARMORTOUGHNESSADD = Key.create(Type.FLOAT, "armortoughnessadd");
 }

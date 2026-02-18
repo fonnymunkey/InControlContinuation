@@ -13,6 +13,8 @@ import mcjty.tools.typed.AttributeMap;
 import mcjty.tools.typed.GenericAttributeMapFactory;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
@@ -234,6 +236,16 @@ public class SpawnRule extends RuleBase<RuleBase.EventGetter> {
                 .attribute(Attribute.create(ACTION_DAMAGEADD))
                 .attribute(Attribute.create(ACTION_SIZEMULTIPLY))
                 .attribute(Attribute.create(ACTION_SIZEADD))
+                .attribute(Attribute.create(ACTION_FOLLOWRANGEMULTIPLY))
+                .attribute(Attribute.create(ACTION_FOLLOWRANGEADD))
+                .attribute(Attribute.create(ACTION_KNOCKBACKRESISTANCEMULTIPLY))
+                .attribute(Attribute.create(ACTION_KNOCKBACKRESISTANCEADD))
+                .attribute(Attribute.create(ACTION_FLYINGSPEEDMULTIPLY))
+                .attribute(Attribute.create(ACTION_FLYINGSPEEDADD))
+                .attribute(Attribute.create(ACTION_ARMORMULTIPLY))
+                .attribute(Attribute.create(ACTION_ARMORADD))
+                .attribute(Attribute.create(ACTION_ARMORTOUGHNESSMULTIPLY))
+                .attribute(Attribute.create(ACTION_ARMORTOUGHNESSADD))
                 .attribute(Attribute.create(ACTION_ANGRY))
                 .attribute(Attribute.create(ACTION_MOBNBT))
                 .attribute(Attribute.create(ACTION_CUSTOMNAME))
@@ -269,6 +281,12 @@ public class SpawnRule extends RuleBase<RuleBase.EventGetter> {
     @Override
     protected void addActions(AttributeMap map, IModRuleCompatibilityLayer layer) {
         super.addActions(map, layer);
+        
+        if(map.has(ACTION_FOLLOWRANGEMULTIPLY) || map.has(ACTION_FOLLOWRANGEADD)) addFollowRangeAction(map);
+        if(map.has(ACTION_KNOCKBACKRESISTANCEMULTIPLY) || map.has(ACTION_KNOCKBACKRESISTANCEADD)) addKnockbackResistanceAction(map);
+        if(map.has(ACTION_FLYINGSPEEDMULTIPLY) || map.has(ACTION_FLYINGSPEEDADD)) addFlyingSpeedAction(map);
+        if(map.has(ACTION_ARMORMULTIPLY) || map.has(ACTION_ARMORADD)) addArmorAction(map);
+        if(map.has(ACTION_ARMORTOUGHNESSMULTIPLY) || map.has(ACTION_ARMORTOUGHNESSADD)) addArmorToughnessAction(map);
 
         if(map.has(ACTION_RESULT)) {
             String br = map.get(ACTION_RESULT);
@@ -277,6 +295,81 @@ public class SpawnRule extends RuleBase<RuleBase.EventGetter> {
             else this.result = Event.Result.DENY;
         }
         else this.result = null;
+    }
+    
+    private void addFollowRangeAction(AttributeMap map) {
+        float m = map.has(ACTION_FOLLOWRANGEMULTIPLY) ? map.get(ACTION_FOLLOWRANGEMULTIPLY) : 1;
+        float a = map.has(ACTION_FOLLOWRANGEADD) ? map.get(ACTION_FOLLOWRANGEADD) : 0;
+        actions.add(event -> {
+            EntityLivingBase entityLiving = event.getEntityLiving();
+            if(entityLiving != null) {
+                IAttributeInstance entityAttribute = entityLiving.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE);
+                if(entityAttribute != null) {
+                    double newMax = entityAttribute.getBaseValue() * m + a;
+                    entityAttribute.setBaseValue(newMax);
+                }
+            }
+        });
+    }
+    
+    private void addKnockbackResistanceAction(AttributeMap map) {
+        float m = map.has(ACTION_KNOCKBACKRESISTANCEMULTIPLY) ? map.get(ACTION_KNOCKBACKRESISTANCEMULTIPLY) : 1;
+        float a = map.has(ACTION_KNOCKBACKRESISTANCEADD) ? map.get(ACTION_KNOCKBACKRESISTANCEADD) : 0;
+        actions.add(event -> {
+            EntityLivingBase entityLiving = event.getEntityLiving();
+            if(entityLiving != null) {
+                IAttributeInstance entityAttribute = entityLiving.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE);
+                if(entityAttribute != null) {
+                    double newMax = entityAttribute.getBaseValue() * m + a;
+                    entityAttribute.setBaseValue(newMax);
+                }
+            }
+        });
+    }
+    
+    private void addFlyingSpeedAction(AttributeMap map) {
+        float m = map.has(ACTION_FLYINGSPEEDMULTIPLY) ? map.get(ACTION_FLYINGSPEEDMULTIPLY) : 1;
+        float a = map.has(ACTION_FLYINGSPEEDADD) ? map.get(ACTION_FLYINGSPEEDADD) : 0;
+        actions.add(event -> {
+            EntityLivingBase entityLiving = event.getEntityLiving();
+            if(entityLiving != null) {
+                IAttributeInstance entityAttribute = entityLiving.getEntityAttribute(SharedMonsterAttributes.FLYING_SPEED);
+                if(entityAttribute != null) {
+                    double newMax = entityAttribute.getBaseValue() * m + a;
+                    entityAttribute.setBaseValue(newMax);
+                }
+            }
+        });
+    }
+    
+    private void addArmorAction(AttributeMap map) {
+        float m = map.has(ACTION_ARMORMULTIPLY) ? map.get(ACTION_ARMORMULTIPLY) : 1;
+        float a = map.has(ACTION_ARMORADD) ? map.get(ACTION_ARMORADD) : 0;
+        actions.add(event -> {
+            EntityLivingBase entityLiving = event.getEntityLiving();
+            if(entityLiving != null) {
+                IAttributeInstance entityAttribute = entityLiving.getEntityAttribute(SharedMonsterAttributes.ARMOR);
+                if(entityAttribute != null) {
+                    double newMax = entityAttribute.getBaseValue() * m + a;
+                    entityAttribute.setBaseValue(newMax);
+                }
+            }
+        });
+    }
+    
+    private void addArmorToughnessAction(AttributeMap map) {
+        float m = map.has(ACTION_ARMORTOUGHNESSMULTIPLY) ? map.get(ACTION_ARMORTOUGHNESSMULTIPLY) : 1;
+        float a = map.has(ACTION_ARMORTOUGHNESSADD) ? map.get(ACTION_ARMORTOUGHNESSADD) : 0;
+        actions.add(event -> {
+            EntityLivingBase entityLiving = event.getEntityLiving();
+            if(entityLiving != null) {
+                IAttributeInstance entityAttribute = entityLiving.getEntityAttribute(SharedMonsterAttributes.ARMOR_TOUGHNESS);
+                if(entityAttribute != null) {
+                    double newMax = entityAttribute.getBaseValue() * m + a;
+                    entityAttribute.setBaseValue(newMax);
+                }
+            }
+        });
     }
 
     public boolean match(LivingSpawnEvent.CheckSpawn event) {
