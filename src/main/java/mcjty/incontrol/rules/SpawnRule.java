@@ -3,6 +3,7 @@ package mcjty.incontrol.rules;
 import com.google.gson.JsonElement;
 import mcjty.incontrol.InControl;
 import mcjty.incontrol.compat.ModRuleCompatibilityLayer;
+import mcjty.incontrol.config.GeneralConfiguration;
 import mcjty.incontrol.rules.support.GenericRuleEvaluator;
 import mcjty.tools.rules.IEventQuery;
 import mcjty.tools.rules.IModRuleCompatibilityLayer;
@@ -75,6 +76,7 @@ public class SpawnRule extends RuleBase<RuleBase.EventGetter> {
             return ItemStack.EMPTY;
         }
     };
+    
     public static final IEventQuery<EntityJoinWorldEvent> EVENT_QUERY_JOIN = new IEventQuery<EntityJoinWorldEvent>() {
         @Override
         public World getWorld(EntityJoinWorldEvent o) {
@@ -121,62 +123,81 @@ public class SpawnRule extends RuleBase<RuleBase.EventGetter> {
             return ItemStack.EMPTY;
         }
     };
+    
     private static final GenericAttributeMapFactory FACTORY = new GenericAttributeMapFactory();
 
     private static EntityPlayer getClosestPlayer(World world, BlockPos pos) {
-        return world.getClosestPlayer(pos.getX(), pos.getY(), pos.getZ(), 100, false);
+        return world.getClosestPlayer(pos.getX(), pos.getY(), pos.getZ(), GeneralConfiguration.MAX_PLAYER_DISTANCE, false);
     }
 
     static {
         FACTORY
+                .attribute(Attribute.create(HOSTILE))
+                .attribute(Attribute.create(PASSIVE))
+                
+                .attribute(Attribute.create(SPAWNER))
+                
+                //player
+                .attribute(Attribute.createMulti(MOB))
+                
+                //explosion
+                //projectile
+                //fire
+                //magic
+                
+                .attribute(Attribute.create(RANDOM))
+                .attribute(Attribute.createMulti(DIMENSION))
                 .attribute(Attribute.create(MINTIME))
                 .attribute(Attribute.create(MAXTIME))
-                .attribute(Attribute.create(MINCOUNT))
-                .attribute(Attribute.create(MAXCOUNT))
-                .attribute(Attribute.create(MINLIGHT))
-                .attribute(Attribute.create(MAXLIGHT))
+                
                 .attribute(Attribute.create(MINHEIGHT))
                 .attribute(Attribute.create(MAXHEIGHT))
-                .attribute(Attribute.create(MINDIFFICULTY))
-                .attribute(Attribute.create(MAXDIFFICULTY))
+                .attribute(Attribute.create(WEATHER))
+                .attribute(Attribute.create(TEMPCATEGORY))
+                .attribute(Attribute.create(DIFFICULTY))
+                
+                //source
+                
                 .attribute(Attribute.create(MINSPAWNDIST))
                 .attribute(Attribute.create(MAXSPAWNDIST))
                 .attribute(Attribute.create(MINPLAYERDIST))
                 .attribute(Attribute.create(MAXPLAYERDIST))
-                .attribute(Attribute.create(RANDOM))
-                .attribute(Attribute.create(CANSPAWNHERE))
-                .attribute(Attribute.create(NOTCOLLIDING))
-                .attribute(Attribute.create(SPAWNER))
-                .attribute(Attribute.create(INBUILDING))
-                .attribute(Attribute.create(INCITY))
-                .attribute(Attribute.create(INSTREET))
-                .attribute(Attribute.create(INSPHERE))
-                .attribute(Attribute.create(GAMESTAGE))
-                .attribute(Attribute.create(PASSIVE))
-                .attribute(Attribute.create(HOSTILE))
+                
+                .attribute(Attribute.create(MINLIGHT))
+                .attribute(Attribute.create(MAXLIGHT))
+                
+                .attribute(Attribute.create(MINDIFFICULTY))
+                .attribute(Attribute.create(MAXDIFFICULTY))
+                
                 .attribute(Attribute.create(SEESKY))
-                .attribute(Attribute.create(WEATHER))
-                .attribute(Attribute.create(TEMPCATEGORY))
-                .attribute(Attribute.create(DIFFICULTY))
-                .attribute(Attribute.create(STRUCTURE))
-                .attribute(Attribute.create(WINTER))
+                .attribute(Attribute.createMulti(BLOCK))
+                .attribute(Attribute.createMulti(BIOME))
+                .attribute(Attribute.createMulti(BIOME_REG))
+                .attribute(Attribute.createMulti(BIOMETYPE))
+                
                 .attribute(Attribute.create(SUMMER))
+                .attribute(Attribute.create(WINTER))
                 .attribute(Attribute.create(SPRING))
                 .attribute(Attribute.create(AUTUMN))
-                .attribute(Attribute.createMulti(MOB))
-                .attribute(Attribute.createMulti(MOD))
-                .attribute(Attribute.createMulti(BLOCK))
-                .attribute(Attribute.create(BLOCKOFFSET))
-                .attribute(Attribute.createMulti(BIOME))
-                .attribute(Attribute.createMulti(BIOMETYPE))
-                .attribute(Attribute.createMulti(BIOME_REG))
-                .attribute(Attribute.createMulti(DIMENSION))
-                .attribute(Attribute.create(STATE))
-
+                
+                .attribute(Attribute.create(GAMESTAGE))
+                
+                .attribute(Attribute.create(HARVEST_MOON))
+                .attribute(Attribute.create(STAR_SHOWER))
+                .attribute(Attribute.create(BLOOD_MOON))
+                .attribute(Attribute.create(FULL_MOON))
+                .attribute(Attribute.create(RED_GIANT))
+                .attribute(Attribute.create(GRIM_ECLIPSE))
+                .attribute(Attribute.create(BLUE_MOON))
+                
                 .attribute(Attribute.createMulti(HELMET))
                 .attribute(Attribute.createMulti(CHESTPLATE))
                 .attribute(Attribute.createMulti(LEGGINGS))
                 .attribute(Attribute.createMulti(BOOTS))
+                .attribute(Attribute.createMulti(PLAYER_HELDITEM))
+                .attribute(Attribute.createMulti(OFFHANDITEM))
+                .attribute(Attribute.createMulti(BOTHHANDSITEM))
+                
                 .attribute(Attribute.createMulti(AMULET))
                 .attribute(Attribute.createMulti(RING))
                 .attribute(Attribute.createMulti(BELT))
@@ -184,9 +205,24 @@ public class SpawnRule extends RuleBase<RuleBase.EventGetter> {
                 .attribute(Attribute.createMulti(HEAD))
                 .attribute(Attribute.createMulti(BODY))
                 .attribute(Attribute.createMulti(CHARM))
-                .attribute(Attribute.createMulti(PLAYER_HELDITEM))
-                .attribute(Attribute.createMulti(OFFHANDITEM))
-                .attribute(Attribute.createMulti(BOTHHANDSITEM))
+                
+                .attribute(Attribute.create(STRUCTURE))
+                
+                .attribute(Attribute.create(INCITY))
+                .attribute(Attribute.create(INSTREET))
+                .attribute(Attribute.create(INSPHERE))
+                .attribute(Attribute.create(INBUILDING))
+                
+                .attribute(Attribute.create(CANSPAWNHERE))
+                .attribute(Attribute.create(NOTCOLLIDING))
+                //realplayer
+                //fakeplayer
+                .attribute(Attribute.createMulti(MOD))
+                .attribute(Attribute.create(MINCOUNT))
+                .attribute(Attribute.create(MAXCOUNT))
+                
+                .attribute(Attribute.create(BLOCKOFFSET))
+                .attribute(Attribute.create(STATE))
 
                 .attribute(Attribute.create(ACTION_RESULT))
                 .attribute(Attribute.create(ACTION_MESSAGE))
@@ -217,14 +253,13 @@ public class SpawnRule extends RuleBase<RuleBase.EventGetter> {
     private SpawnRule(AttributeMap map, boolean onJoin) {
         super(InControl.setup.getLogger());
         this.onJoin = onJoin;
-        ruleEvaluator = new GenericRuleEvaluator(map);
+        ruleEvaluator = new GenericRuleEvaluator<>(map);
         addActions(map, new ModRuleCompatibilityLayer());
     }
 
     public static SpawnRule parse(JsonElement element) {
-        if (element == null) {
-            return null;
-        } else {
+        if(element == null) return null;
+        else {
             AttributeMap map = FACTORY.parse(element);
             boolean onJoin = element.getAsJsonObject().has("onjoin") && element.getAsJsonObject().get("onjoin").getAsBoolean();
             return new SpawnRule(map, onJoin);
@@ -235,18 +270,13 @@ public class SpawnRule extends RuleBase<RuleBase.EventGetter> {
     protected void addActions(AttributeMap map, IModRuleCompatibilityLayer layer) {
         super.addActions(map, layer);
 
-        if (map.has(ACTION_RESULT)) {
+        if(map.has(ACTION_RESULT)) {
             String br = map.get(ACTION_RESULT);
-            if ("default".equals(br) || br.startsWith("def")) {
-                this.result = Event.Result.DEFAULT;
-            } else if ("allow".equals(br) || "true".equals(br)) {
-                this.result = Event.Result.ALLOW;
-            } else {
-                this.result = Event.Result.DENY;
-            }
-        } else {
-            this.result = null;
+            if("default".equals(br) || br.startsWith("def")) this.result = Event.Result.DEFAULT;
+            else if("allow".equals(br) || "true".equals(br)) this.result = Event.Result.ALLOW;
+            else this.result = Event.Result.DENY;
         }
+        else this.result = null;
     }
 
     public boolean match(LivingSpawnEvent.CheckSpawn event) {
@@ -279,7 +309,7 @@ public class SpawnRule extends RuleBase<RuleBase.EventGetter> {
                 return event.getEntityLiving().getPosition();
             }
         };
-        for (Consumer<EventGetter> action : actions) {
+        for(Consumer<EventGetter> action : actions) {
             action.accept(getter);
         }
     }
@@ -306,7 +336,7 @@ public class SpawnRule extends RuleBase<RuleBase.EventGetter> {
                 return event.getEntity() != null ? event.getEntity().getPosition() : null;
             }
         };
-        for (Consumer<EventGetter> action : actions) {
+        for(Consumer<EventGetter> action : actions) {
             action.accept(getter);
         }
     }

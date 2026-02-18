@@ -41,6 +41,8 @@ dependencies {
     compileOnly fg.deobf("curse.maven:lostcities-${lostcities_version}")
     compileOnly fg.deobf("curse.maven:gamestages-${gamestages_version}")
     compileOnly fg.deobf("curse.maven:sereneseasons-${sereneseasons_version}")
+    compileOnly fg.deobf("curse.maven:nyx-${nyx_version}")
+    compileOnly fg.deobf("curse.maven:hyxcate-${hyxcate_version}")
 }
 
 mixin {

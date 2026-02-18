@@ -52,4 +52,11 @@ public interface RuleKeys extends CommonRuleKeys {
     Key<Integer> MOB_GROUPCOUNTMIN = Key.create(Type.INTEGER, "groupcountmin");
     Key<Integer> MOB_GROUPCOUNTMAX = Key.create(Type.INTEGER, "groupcountmax");
 
+    Key<Boolean> HARVEST_MOON = Key.create(Type.BOOLEAN, "harvestmoon");
+    Key<Boolean> STAR_SHOWER = Key.create(Type.BOOLEAN, "starshower");
+    Key<Boolean> BLOOD_MOON = Key.create(Type.BOOLEAN, "bloodmoon");
+    Key<Boolean> FULL_MOON = Key.create(Type.BOOLEAN, "fullmoon");
+    Key<Boolean> RED_GIANT = Key.create(Type.BOOLEAN, "redgiant");
+    Key<Boolean> GRIM_ECLIPSE = Key.create(Type.BOOLEAN, "grimeclipse");
+    Key<Boolean> BLUE_MOON = Key.create(Type.BOOLEAN, "bluemoon");
 }

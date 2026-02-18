@@ -1,15 +1,15 @@
 package mcjty.incontrol.compat;
 
 import mcjty.incontrol.mixin.BiomeAccessor;
+import mcjty.incontrol.rules.support.IModRuleExpandedCompatibilityLayer;
 import mcjty.incontrol.setup.ModSetup;
 import mcjty.tools.rules.IEventQuery;
-import mcjty.tools.rules.IModRuleCompatibilityLayer;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 
-public class ModRuleCompatibilityLayer implements IModRuleCompatibilityLayer {
+public class ModRuleCompatibilityLayer implements IModRuleExpandedCompatibilityLayer {
 
     @Override
     public boolean hasBaubles() {
@@ -154,5 +154,65 @@ public class ModRuleCompatibilityLayer implements IModRuleCompatibilityLayer {
     @Override
     public String getBiomeName(Biome biome) {
         return ((BiomeAccessor)biome).getBiomeNameSafe();
+    }
+    
+    @Override
+    public boolean hasNyx() {
+        return ModSetup.nyx;
+    }
+    
+    @Override
+    public boolean isHarvestMoonNyx(World world) {
+        return NyxSupport.isHarvestMoon(world);
+    }
+    
+    @Override
+    public boolean isStarShowerNyx(World world) {
+        return NyxSupport.isStarShower(world);
+    }
+    
+    @Override
+    public boolean isBloodMoonNyx(World world) {
+        return NyxSupport.isBloodMoon(world);
+    }
+    
+    @Override
+    public boolean isFullMoonNyx(World world) {
+        return NyxSupport.isFullMoon(world);
+    }
+    
+    @Override
+    public boolean hasHyxcate() {
+        return ModSetup.hyxcate;
+    }
+    
+    @Override
+    public boolean isRedGiantHyxcate(World world) {
+        return HyxcateSupport.isRedGiant(world);
+    }
+    
+    @Override
+    public boolean isGrimEclipseHyxcate(World world) {
+        return HyxcateSupport.isGrimEclipse(world);
+    }
+    
+    @Override
+    public boolean isBlueMoonHyxcate(World world) {
+        return HyxcateSupport.isBlueMoon(world);
+    }
+    
+    @Override
+    public boolean isStarShowerHyxcate(World world) {
+        return HyxcateSupport.isStarShower(world);
+    }
+    
+    @Override
+    public boolean isBloodMoonHyxcate(World world) {
+        return HyxcateSupport.isBloodMoon(world);
+    }
+    
+    @Override
+    public boolean isFullMoonHyxcate(World world) {
+        return HyxcateSupport.isFullMoon(world);
     }
 }

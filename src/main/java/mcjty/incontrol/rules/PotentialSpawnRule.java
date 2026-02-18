@@ -80,47 +80,109 @@ public class PotentialSpawnRule extends RuleBase<RuleBase.EventGetter> {
             return ItemStack.EMPTY;
         }
     };
+    
     public static final EntityId FIXER = new EntityId();
     private static final GenericAttributeMapFactory FACTORY = new GenericAttributeMapFactory();
     private static final GenericAttributeMapFactory MOB_FACTORY = new GenericAttributeMapFactory();
 
     static {
         FACTORY
-                .attribute(Attribute.create(MINCOUNT))
-                .attribute(Attribute.create(MAXCOUNT))
+                //hostile
+                //passive
+                
+                //spawner
+                
+                //player
+                //mob
+                
+                //explosion
+                //projectile
+                //fire
+                //magic
+                
+                .attribute(Attribute.create(RANDOM))
+                .attribute(Attribute.createMulti(DIMENSION))
                 .attribute(Attribute.create(MINTIME))
                 .attribute(Attribute.create(MAXTIME))
-                .attribute(Attribute.create(MINLIGHT))
-                .attribute(Attribute.create(MAXLIGHT))
+                
                 .attribute(Attribute.create(MINHEIGHT))
                 .attribute(Attribute.create(MAXHEIGHT))
-                .attribute(Attribute.create(MINDIFFICULTY))
-                .attribute(Attribute.create(MAXDIFFICULTY))
+                .attribute(Attribute.create(WEATHER))
+                .attribute(Attribute.create(TEMPCATEGORY))
+                .attribute(Attribute.create(DIFFICULTY))
+                
+                //source
+                
                 .attribute(Attribute.create(MINSPAWNDIST))
                 .attribute(Attribute.create(MAXSPAWNDIST))
                 .attribute(Attribute.create(MINPLAYERDIST))
                 .attribute(Attribute.create(MAXPLAYERDIST))
-                .attribute(Attribute.create(RANDOM))
+                
+                .attribute(Attribute.create(MINLIGHT))
+                .attribute(Attribute.create(MAXLIGHT))
+                
+                .attribute(Attribute.create(MINDIFFICULTY))
+                .attribute(Attribute.create(MAXDIFFICULTY))
+                
                 .attribute(Attribute.create(SEESKY))
-                .attribute(Attribute.create(WEATHER))
-                .attribute(Attribute.create(TEMPCATEGORY))
-                .attribute(Attribute.create(DIFFICULTY))
-                .attribute(Attribute.create(STRUCTURE))
-                .attribute(Attribute.create(WINTER))
+                .attribute(Attribute.createMulti(BLOCK))
+                .attribute(Attribute.createMulti(BIOME))
+                .attribute(Attribute.createMulti(BIOME_REG))
+                .attribute(Attribute.createMulti(BIOMETYPE))
+                
                 .attribute(Attribute.create(SUMMER))
+                .attribute(Attribute.create(WINTER))
                 .attribute(Attribute.create(SPRING))
                 .attribute(Attribute.create(AUTUMN))
-                .attribute(Attribute.create(STATE))
-                .attribute(Attribute.createMulti(BLOCK))
-                .attribute(Attribute.create(BLOCKOFFSET))
-                .attribute(Attribute.createMulti(BIOME))
-                .attribute(Attribute.createMulti(BIOMETYPE))
-                .attribute(Attribute.createMulti(BIOME_REG))
-                .attribute(Attribute.createMulti(DIMENSION))
-
-                .attribute(Attribute.createMulti(ACTION_REMOVE_MOBS))
+                
+                //gamestage
+                
+                .attribute(Attribute.create(HARVEST_MOON))
+                .attribute(Attribute.create(STAR_SHOWER))
+                .attribute(Attribute.create(BLOOD_MOON))
+                .attribute(Attribute.create(FULL_MOON))
+                .attribute(Attribute.create(RED_GIANT))
+                .attribute(Attribute.create(GRIM_ECLIPSE))
+                .attribute(Attribute.create(BLUE_MOON))
+                
+                //helmet
+                //chestplate
+                //leggings
+                //boots
+                //playerhelditem
+                //helditem
+                //offhanditem
+                //bothhandsitem
+                
+                //amulet
+                //ring
+                //belt
+                //trinket
+                //head
+                //body
+                //charm
+                
+                .attribute(Attribute.create(STRUCTURE))
+                
+                //incity
+                //instreet
+                //insphere
+                //inbuilding
+                
+                //canspawnhere
+                //notcolliding
+                //realplayer
+                //fakeplayer
+                //mod
+                .attribute(Attribute.create(MINCOUNT))
+                .attribute(Attribute.create(MAXCOUNT))
                 
                 .attribute(Attribute.create(ENUM_CREATURE_TYPE))
+                
+                .attribute(Attribute.create(STATE))
+                .attribute(Attribute.create(BLOCKOFFSET))
+
+                .attribute(Attribute.createMulti(ACTION_REMOVE_MOBS))
         ;
 
         MOB_FACTORY
@@ -131,7 +193,7 @@ public class PotentialSpawnRule extends RuleBase<RuleBase.EventGetter> {
         ;
     }
 
-    private final GenericRuleEvaluator ruleEvaluator;
+    private final GenericRuleEvaluator<WorldEvent.PotentialSpawns> ruleEvaluator;
     private final List<Biome.SpawnListEntry> spawnEntries = new ArrayList<>();
     private final List<Class<?>> toRemoveMobs = new ArrayList<>();
     private boolean removeAll = false;
@@ -140,21 +202,17 @@ public class PotentialSpawnRule extends RuleBase<RuleBase.EventGetter> {
     private PotentialSpawnRule(AttributeMap map) {
         super(InControl.setup.getLogger());
 
-        ruleEvaluator = new GenericRuleEvaluator(map);
+        ruleEvaluator = new GenericRuleEvaluator<>(map);
 
-        if ((!map.has(ACTION_MOBS)) && (!map.has(ACTION_REMOVE_MOBS))) {
+        if((!map.has(ACTION_MOBS)) && (!map.has(ACTION_REMOVE_MOBS))) {
             InControl.setup.getLogger().log(Level.ERROR, "No 'mobs' or 'remove' specified!");
             return;
         }
         
-        if (map.has(ENUM_CREATURE_TYPE)) {
-            setCreatureType(map.get(ENUM_CREATURE_TYPE));
-        }
+        if(map.has(ENUM_CREATURE_TYPE)) setCreatureType(map.get(ENUM_CREATURE_TYPE));
         
         makeSpawnEntries(map);
-        if (map.has(ACTION_REMOVE_MOBS)) {
-            addToRemoveAction(map);
-        }
+        if(map.has(ACTION_REMOVE_MOBS)) addToRemoveAction(map);
     }
 
     public static String fixEntityId(String id) {
@@ -165,19 +223,15 @@ public class PotentialSpawnRule extends RuleBase<RuleBase.EventGetter> {
     }
 
     public static PotentialSpawnRule parse(JsonElement element) {
-        if (element == null) {
-            return null;
-        } else {
+        if(element == null) return null;
+        else {
             JsonObject jsonObject = element.getAsJsonObject();
-            if ((!jsonObject.has("mobs")) && (!jsonObject.has("remove"))) {
-                return null;
-            }
+            if((!jsonObject.has("mobs")) && (!jsonObject.has("remove"))) return null;
 
             AttributeMap map = FACTORY.parse(element);
-
-            if (jsonObject.has("mobs")) {
+            if(jsonObject.has("mobs")) {
                 JsonArray mobs = jsonObject.get("mobs").getAsJsonArray();
-                for (JsonElement mob : mobs) {
+                for(JsonElement mob : mobs) {
                     AttributeMap mobMap = MOB_FACTORY.parse(mob);
                     map.addList(ACTION_MOBS, mobMap);
                 }
@@ -192,7 +246,7 @@ public class PotentialSpawnRule extends RuleBase<RuleBase.EventGetter> {
 			this.creatureType = EnumCreatureType.valueOf(name);
         }
         catch(Exception ex) {
-            InControl.setup.getLogger().log(Level.ERROR, "Invalid creature type '" + name + "'!");
+            InControl.setup.getLogger().log(Level.ERROR, "Invalid creature type '{}'!", name);
         }
     }
 
@@ -200,12 +254,12 @@ public class PotentialSpawnRule extends RuleBase<RuleBase.EventGetter> {
         List<String> toremove = map.getList(ACTION_REMOVE_MOBS);
         if(toremove.size() == 1 && toremove.get(0).equals("*")) this.removeAll = true;
         else {
-            for (String s : toremove) {
+            for(String s : toremove) {
                 String id = fixEntityId(s);
                 EntityEntry entry = ForgeRegistries.ENTITIES.getValue(new ResourceLocation(id));
                 Class<? extends Entity> clazz = entry == null ? null : entry.getEntityClass();
-                if (clazz == null) {
-                    InControl.setup.getLogger().log(Level.ERROR, "Cannot find mob '" + s + "'!");
+                if(clazz == null) {
+                    InControl.setup.getLogger().log(Level.ERROR, "Cannot find mob '{}'!", s);
                     return;
                 }
                 toRemoveMobs.add(clazz);
@@ -256,4 +310,3 @@ public class PotentialSpawnRule extends RuleBase<RuleBase.EventGetter> {
         return toRemoveMobs;
     }
 }
-

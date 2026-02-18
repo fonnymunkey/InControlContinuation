@@ -19,6 +19,8 @@ public class ModSetup {
     public static boolean gamestages = false;
     public static boolean sereneSeasons = false;
     public static boolean baubles = false;
+    public static boolean nyx = false;
+    public static boolean hyxcate = false;
 
     private Logger logger;
     public RuleCache cache = new RuleCache();
@@ -43,6 +45,8 @@ public class ModSetup {
         gamestages = Loader.isModLoaded("gamestages");
         sereneSeasons = Loader.isModLoaded("sereneseasons");
         baubles = Loader.isModLoaded("baubles");
+        nyx = Loader.isModLoaded("nyx") && Loader.instance().getIndexedModList().get("nyx").getName().equals("Nyx");
+        hyxcate = Loader.isModLoaded("nyx") && Loader.instance().getIndexedModList().get("nyx").getName().equals("Hyxcate");
 
         if (ModSetup.lostcities) {
             LostCitySupport.register();
@@ -56,6 +60,12 @@ public class ModSetup {
         }
         if (ModSetup.baubles) {
             logger.log(Level.INFO, "Enabling support for Baubles");
+        }
+        if (ModSetup.nyx) {
+            logger.log(Level.INFO, "Enabling support for Nyx");
+        }
+        if (ModSetup.hyxcate) {
+            logger.log(Level.INFO, "Enabling support for Hyxcate");
         }
     }
 

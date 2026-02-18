@@ -35,11 +35,9 @@ import org.apache.logging.log4j.Level;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.function.Consumer;
 
 import static mcjty.incontrol.rules.support.RuleKeys.*;
-
 
 public class SummonAidRule extends RuleBase<SummonEventGetter> {
 
@@ -89,51 +87,102 @@ public class SummonAidRule extends RuleBase<SummonEventGetter> {
             return ItemStack.EMPTY;
         }
     };
+    
     private static final GenericAttributeMapFactory FACTORY = new GenericAttributeMapFactory();
-    private static Random rnd = new Random();
 
     static {
         FACTORY
+                .attribute(Attribute.create(HOSTILE))
+                .attribute(Attribute.create(PASSIVE))
+                
+                //spawner
+                
+                //player
+                .attribute(Attribute.createMulti(MOB))
+                
+                //explosion
+                //projectile
+                //fire
+                //magic
+                
+                .attribute(Attribute.create(RANDOM))
+                .attribute(Attribute.createMulti(DIMENSION))
                 .attribute(Attribute.create(MINTIME))
                 .attribute(Attribute.create(MAXTIME))
-                .attribute(Attribute.create(MINCOUNT))
-                .attribute(Attribute.create(MAXCOUNT))
-                .attribute(Attribute.create(MINLIGHT))
-                .attribute(Attribute.create(MAXLIGHT))
+                
                 .attribute(Attribute.create(MINHEIGHT))
                 .attribute(Attribute.create(MAXHEIGHT))
-                .attribute(Attribute.create(MINDIFFICULTY))
-                .attribute(Attribute.create(MAXDIFFICULTY))
+                .attribute(Attribute.create(WEATHER))
+                .attribute(Attribute.create(TEMPCATEGORY))
+                .attribute(Attribute.create(DIFFICULTY))
+                
+                //source
+                
                 .attribute(Attribute.create(MINSPAWNDIST))
                 .attribute(Attribute.create(MAXSPAWNDIST))
                 .attribute(Attribute.create(MINPLAYERDIST))
                 .attribute(Attribute.create(MAXPLAYERDIST))
-                .attribute(Attribute.create(RANDOM))
-                .attribute(Attribute.create(CANSPAWNHERE))
-                .attribute(Attribute.create(NOTCOLLIDING))
-                .attribute(Attribute.create(INBUILDING))
+                
+                .attribute(Attribute.create(MINLIGHT))
+                .attribute(Attribute.create(MAXLIGHT))
+                
+                .attribute(Attribute.create(MINDIFFICULTY))
+                .attribute(Attribute.create(MAXDIFFICULTY))
+                
+                .attribute(Attribute.create(SEESKY))
+                .attribute(Attribute.createMulti(BLOCK))
+                .attribute(Attribute.createMulti(BIOME))
+                .attribute(Attribute.createMulti(BIOME_REG))
+                .attribute(Attribute.createMulti(BIOMETYPE))
+                
+                .attribute(Attribute.create(SUMMER))
+                .attribute(Attribute.create(WINTER))
+                .attribute(Attribute.create(SPRING))
+                .attribute(Attribute.create(AUTUMN))
+                
+                //gamestage
+                
+                .attribute(Attribute.create(HARVEST_MOON))
+                .attribute(Attribute.create(STAR_SHOWER))
+                .attribute(Attribute.create(BLOOD_MOON))
+                .attribute(Attribute.create(FULL_MOON))
+                .attribute(Attribute.create(RED_GIANT))
+                .attribute(Attribute.create(GRIM_ECLIPSE))
+                .attribute(Attribute.create(BLUE_MOON))
+                
+                //helmet
+                //chestplate
+                //leggings
+                //boots
+                //playerhelditem
+                //helditem
+                //offhanditem
+                //bothhandsitem
+                
+                //amulet
+                //ring
+                //belt
+                //trinket
+                //head
+                //body
+                //charm
+                
+                .attribute(Attribute.create(STRUCTURE))
+                
                 .attribute(Attribute.create(INCITY))
                 .attribute(Attribute.create(INSTREET))
                 .attribute(Attribute.create(INSPHERE))
-                .attribute(Attribute.create(PASSIVE))
-                .attribute(Attribute.create(HOSTILE))
-                .attribute(Attribute.create(SEESKY))
-                .attribute(Attribute.create(WEATHER))
-                .attribute(Attribute.create(TEMPCATEGORY))
-                .attribute(Attribute.create(DIFFICULTY))
-                .attribute(Attribute.create(STRUCTURE))
-                .attribute(Attribute.create(WINTER))
-                .attribute(Attribute.create(SUMMER))
-                .attribute(Attribute.create(SPRING))
-                .attribute(Attribute.create(AUTUMN))
-                .attribute(Attribute.createMulti(MOB))
+                .attribute(Attribute.create(INBUILDING))
+                
+                .attribute(Attribute.create(CANSPAWNHERE))
+                .attribute(Attribute.create(NOTCOLLIDING))
+                //realplayer
+                //fakeplayer
                 .attribute(Attribute.createMulti(MOD))
-                .attribute(Attribute.createMulti(BLOCK))
+                .attribute(Attribute.create(MINCOUNT))
+                .attribute(Attribute.create(MAXCOUNT))
+                
                 .attribute(Attribute.create(BLOCKOFFSET))
-                .attribute(Attribute.createMulti(BIOME))
-                .attribute(Attribute.createMulti(BIOMETYPE))
-                .attribute(Attribute.createMulti(BIOME_REG))
-                .attribute(Attribute.createMulti(DIMENSION))
                 .attribute(Attribute.create(STATE))
 
                 .attribute(Attribute.create(ACTION_RESULT))
@@ -144,8 +193,8 @@ public class SummonAidRule extends RuleBase<SummonEventGetter> {
                 .attribute(Attribute.create(ACTION_SPEEDADD))
                 .attribute(Attribute.create(ACTION_DAMAGEMULTIPLY))
                 .attribute(Attribute.create(ACTION_DAMAGEADD))
-                .attribute(Attribute.create(ACTION_SIZEMULTIPLY))
-                .attribute(Attribute.create(ACTION_SIZEADD))
+                //.attribute(Attribute.create(ACTION_SIZEMULTIPLY))
+                //.attribute(Attribute.create(ACTION_SIZEADD))
                 .attribute(Attribute.create(ACTION_ANGRY))
                 .attribute(Attribute.createMulti(ACTION_HELDITEM))
                 .attribute(Attribute.createMulti(ACTION_ARMORBOOTS))
@@ -156,19 +205,18 @@ public class SummonAidRule extends RuleBase<SummonEventGetter> {
         ;
     }
 
-    private final GenericRuleEvaluator ruleEvaluator;
+    private final GenericRuleEvaluator<ZombieEvent.SummonAidEvent> ruleEvaluator;
     private Event.Result result;
 
     private SummonAidRule(AttributeMap map) {
         super(InControl.setup.getLogger());
-        ruleEvaluator = new GenericRuleEvaluator(map);
+        ruleEvaluator = new GenericRuleEvaluator<>(map);
         addActions(map, new ModRuleCompatibilityLayer());
     }
 
     public static SummonAidRule parse(JsonElement element) {
-        if (element == null) {
-            return null;
-        } else {
+        if(element == null) return null;
+        else {
             AttributeMap map = FACTORY.parse(element);
             return new SummonAidRule(map);
         }
@@ -178,53 +226,37 @@ public class SummonAidRule extends RuleBase<SummonEventGetter> {
     protected void addActions(AttributeMap map, IModRuleCompatibilityLayer layer) {
         super.addActions(map, layer);
 
-        if (map.has(ACTION_RESULT)) {
+        if(map.has(ACTION_RESULT)) {
             String br = map.get(ACTION_RESULT);
-            if ("default".equals(br) || br.startsWith("def")) {
-                this.result = Event.Result.DEFAULT;
-            } else if ("allow".equals(br) || "true".equals(br)) {
-                this.result = Event.Result.ALLOW;
-            } else {
-                this.result = Event.Result.DENY;
-            }
-        } else {
-            this.result = Event.Result.DEFAULT;
+            if("default".equals(br) || br.startsWith("def")) this.result = Event.Result.DEFAULT;
+            else if ("allow".equals(br) || "true".equals(br)) this.result = Event.Result.ALLOW;
+            else this.result = Event.Result.DENY;
         }
+        else this.result = Event.Result.DEFAULT;
 
-        if (map.has(ACTION_ANGRY)) {
-            addAngryAction(map);
-        }
-        if (map.has(ACTION_HELDITEM)) {
-            addHeldItem(map);
-        }
-        if (map.has(ACTION_ARMORBOOTS)) {
-            addArmorItem(map, ACTION_ARMORBOOTS, EntityEquipmentSlot.FEET);
-        }
-        if (map.has(ACTION_ARMORLEGS)) {
-            addArmorItem(map, ACTION_ARMORLEGS, EntityEquipmentSlot.LEGS);
-        }
-        if (map.has(ACTION_ARMORHELMET)) {
-            addArmorItem(map, ACTION_ARMORHELMET, EntityEquipmentSlot.HEAD);
-        }
-        if (map.has(ACTION_ARMORCHEST)) {
-            addArmorItem(map, ACTION_ARMORCHEST, EntityEquipmentSlot.CHEST);
-        }
-        if (map.has(ACTION_POTION)) {
-            addPotionsAction(map);
-        }
+        if(map.has(ACTION_HEALTHMULTIPLY) || map.has(ACTION_HEALTHADD)) addHealthAction(map);
+        if(map.has(ACTION_SPEEDMULTIPLY) || map.has(ACTION_SPEEDADD)) addSpeedAction(map);
+        if(map.has(ACTION_DAMAGEMULTIPLY) || map.has(ACTION_DAMAGEADD)) addDamageAction(map);
+        if(map.has(ACTION_ANGRY)) addAngryAction(map);
+        if(map.has(ACTION_HELDITEM)) addHeldItem(map);
+        if(map.has(ACTION_ARMORBOOTS)) addArmorItem(map, ACTION_ARMORBOOTS, EntityEquipmentSlot.FEET);
+        if(map.has(ACTION_ARMORLEGS)) addArmorItem(map, ACTION_ARMORLEGS, EntityEquipmentSlot.LEGS);
+        if(map.has(ACTION_ARMORHELMET)) addArmorItem(map, ACTION_ARMORHELMET, EntityEquipmentSlot.HEAD);
+        if(map.has(ACTION_ARMORCHEST)) addArmorItem(map, ACTION_ARMORCHEST, EntityEquipmentSlot.CHEST);
+        if(map.has(ACTION_POTION)) addPotionsAction(map);
     }
 
     private void addPotionsAction(AttributeMap map) {
         List<PotionEffect> effects = new ArrayList<>();
-        for (String p : map.getList(ACTION_POTION)) {
+        for(String p : map.getList(ACTION_POTION)) {
             String[] splitted = StringUtils.split(p, ',');
-            if (splitted == null || splitted.length != 3) {
-                InControl.setup.getLogger().log(Level.ERROR, "Bad potion specifier '" + p + "'! Use <potion>,<duration>,<amplifier>");
+            if(splitted == null || splitted.length != 3) {
+                InControl.setup.getLogger().log(Level.ERROR, "Bad potion specifier '{}'! Use <potion>,<duration>,<amplifier>", p);
                 continue;
             }
             Potion potion = ForgeRegistries.POTIONS.getValue(new ResourceLocation(splitted[0]));
-            if (potion == null) {
-                InControl.setup.getLogger().log(Level.ERROR, "Can't find potion '" + p + "'!");
+            if(potion == null) {
+                InControl.setup.getLogger().log(Level.ERROR, "Can't find potion '{}'!", p);
                 continue;
             }
             int duration = 0;
@@ -232,16 +264,17 @@ public class SummonAidRule extends RuleBase<SummonEventGetter> {
             try {
                 duration = Integer.parseInt(splitted[1]);
                 amplifier = Integer.parseInt(splitted[2]);
-            } catch (NumberFormatException e) {
-                InControl.setup.getLogger().log(Level.ERROR, "Bad duration or amplifier integer for '" + p + "'!");
+            }
+            catch(NumberFormatException e) {
+                InControl.setup.getLogger().log(Level.ERROR, "Bad duration or amplifier integer for '{}'!", p);
                 continue;
             }
             effects.add(new PotionEffect(potion, duration, amplifier));
         }
-        if (!effects.isEmpty()) {
+        if(!effects.isEmpty()) {
             actions.add(event -> {
                 EntityLivingBase living = event.getZombieHelper();
-                for (PotionEffect effect : effects) {
+                for(PotionEffect effect : effects) {
                     PotionEffect neweffect = new PotionEffect(effect.getPotion(), effect.getDuration(), effect.getAmplifier());
                     living.addPotionEffect(neweffect);
                 }
@@ -251,16 +284,15 @@ public class SummonAidRule extends RuleBase<SummonEventGetter> {
 
     private void addArmorItem(AttributeMap map, Key<String> itemKey, EntityEquipmentSlot slot) {
         List<Pair<Float, ItemStack>> items = getItemsWeighted(map.getList(itemKey));
-        if (items.isEmpty()) {
-            return;
-        }
-        if (items.size() == 1) {
+        if(items.isEmpty()) return;
+        if(items.size() == 1) {
             Pair<Float, ItemStack> pair = items.get(0);
             actions.add(event -> {
                 EntityZombie helper = event.getZombieHelper();
                 helper.setItemStackToSlot(slot, pair.getRight().copy());
             });
-        } else {
+        }
+        else {
             final float total = getTotal(items);
             actions.add(event -> {
                 ItemStack item = getRandomItem(items, total);
@@ -272,16 +304,15 @@ public class SummonAidRule extends RuleBase<SummonEventGetter> {
 
     private void addHeldItem(AttributeMap map) {
         List<Pair<Float, ItemStack>> items = getItemsWeighted(map.getList(ACTION_HELDITEM));
-        if (items.isEmpty()) {
-            return;
-        }
-        if (items.size() == 1) {
+        if(items.isEmpty()) return;
+        if(items.size() == 1) {
             Pair<Float, ItemStack> pair = items.get(0);
             actions.add(event -> {
                 EntityZombie helper = event.getZombieHelper();
                 helper.setHeldItem(EnumHand.MAIN_HAND, pair.getRight().copy());
             });
-        } else {
+        }
+        else {
             final float total = getTotal(items);
             actions.add(event -> {
                 ItemStack item = getRandomItem(items, total);
@@ -292,13 +323,11 @@ public class SummonAidRule extends RuleBase<SummonEventGetter> {
     }
 
     private void addAngryAction(AttributeMap map) {
-        if (map.get(ACTION_ANGRY)) {
+        if(map.get(ACTION_ANGRY)) {
             actions.add(event -> {
                 EntityZombie helper = event.getZombieHelper();
                 EntityPlayer player = event.getWorld().getClosestPlayerToEntity(helper, 50);
-                if (player != null) {
-                    helper.setAttackTarget(player);
-                }
+                if(player != null) helper.setAttackTarget(player);
             });
         }
     }
@@ -309,7 +338,7 @@ public class SummonAidRule extends RuleBase<SummonEventGetter> {
         actions.add(event -> {
             EntityZombie helper = event.getZombieHelper();
             IAttributeInstance entityAttribute = helper.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH);
-            if (entityAttribute != null) {
+            if(entityAttribute != null) {
                 double newMax = entityAttribute.getBaseValue() * m + a;
                 entityAttribute.setBaseValue(newMax);
                 helper.setHealth((float) newMax);
@@ -323,31 +352,32 @@ public class SummonAidRule extends RuleBase<SummonEventGetter> {
         actions.add(event -> {
             EntityZombie helper = event.getZombieHelper();
             IAttributeInstance entityAttribute = helper.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED);
-            if (entityAttribute != null) {
+            if(entityAttribute != null) {
                 double newMax = entityAttribute.getBaseValue() * m + a;
                 entityAttribute.setBaseValue(newMax);
             }
         });
     }
 
+    /*
     private void addSizeActions(AttributeMap map) {
         InControl.setup.getLogger().log(Level.WARN, "Mob resizing not implemented yet!");
         float m = map.has(ACTION_SIZEMULTIPLY) ? map.get(ACTION_SIZEMULTIPLY) : 1;
         float a = map.has(ACTION_SIZEADD) ? map.get(ACTION_SIZEADD) : 0;
         actions.add(event -> {
             EntityZombie helper = event.getZombieHelper();
-            // Not implemented yet
-//                entityLiving.setSize(entityLiving.width * m + a, entityLiving.height * m + a);
+            entityLiving.setSize(entityLiving.width * m + a, entityLiving.height * m + a);
         });
     }
-
+    */
+    
     private void addDamageAction(AttributeMap map) {
         float m = map.has(ACTION_DAMAGEMULTIPLY) ? map.get(ACTION_DAMAGEMULTIPLY) : 1;
         float a = map.has(ACTION_DAMAGEADD) ? map.get(ACTION_DAMAGEADD) : 0;
         actions.add(event -> {
             EntityZombie helper = event.getZombieHelper();
             IAttributeInstance entityAttribute = helper.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE);
-            if (entityAttribute != null) {
+            if(entityAttribute != null) {
                 double newMax = entityAttribute.getBaseValue() * m + a;
                 entityAttribute.setBaseValue(newMax);
             }
@@ -383,13 +413,11 @@ public class SummonAidRule extends RuleBase<SummonEventGetter> {
             @Override
             public EntityZombie getZombieHelper() {
                 EntityZombie helper = event.getCustomSummonedAid();
-                if (helper == null) {
-                    helper = new EntityZombie(event.getWorld());
-                }
+                if(helper == null) helper = new EntityZombie(event.getWorld());
                 return helper;
             }
         };
-        for (Consumer<SummonEventGetter> action : actions) {
+        for(Consumer<SummonEventGetter> action : actions) {
             action.accept(getter);
         }
     }
