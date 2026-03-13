@@ -1,6 +1,5 @@
 package mcjty.incontrol;
 
-
 import mcjty.incontrol.commands.*;
 import mcjty.incontrol.rules.EntityModCache;
 import mcjty.incontrol.rules.RulesManager;
@@ -20,8 +19,8 @@ import net.minecraftforge.fml.common.event.*;
 public class InControl {
 
     public static final String MODID = "incontrol";
-    public static final String MODNAME = "InControl";
-    public static final String VERSION = "3.9.18";
+    public static final String MODNAME = "InControlContinuation";
+    public static final String VERSION = "3.10.0";
     public static final String MIN_FORGE11_VER = "13.19.0.2176";
 
     @SidedProxy(clientSide = "mcjty.incontrol.setup.ClientProxy", serverSide = "mcjty.incontrol.setup.ServerProxy")
