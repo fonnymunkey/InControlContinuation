@@ -47,7 +47,10 @@ public class ForgeEventHandlers {
                             + " y: " + event.getEntity().getPosition().getY());
                 }
                 if (result != Event.Result.DENY) {
-                    rule.action(event);
+                    if(!event.getEntity().getEntityData().getBoolean("incontrol:onjoinaction")) {
+                        event.getEntity().getEntityData().setBoolean("incontrol:onjoinaction", true);
+                        rule.action(event);
+                    }
                 } else {
                     event.setCanceled(true);
                 }
@@ -91,7 +94,11 @@ public class ForgeEventHandlers {
                     event.setResult(result);
                 }
                 if (result != Event.Result.DENY) {
-                    rule.action(event);
+                    if(!rule.isOnJoin()) rule.action(event);
+                    else if(!event.getEntity().getEntityData().getBoolean("incontrol:onjoinaction")) {
+                        event.getEntity().getEntityData().setBoolean("incontrol:onjoinaction", true);
+                        rule.action(event);
+                    }
                 }
                 return;
             }
