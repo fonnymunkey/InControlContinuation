@@ -36,6 +36,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.EnumDifficulty;
+import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.common.BiomeDictionary;
@@ -228,6 +229,8 @@ public class GenericRuleEvaluator<T> {
         
         if(map.has(CANSPAWNHERE)) addCanSpawnHereCheck(map);
         if(map.has(NOTCOLLIDING)) addNotCollidingCheck(map);
+
+        if(map.has(GAMERULE)) addGameruleCheck(map);
 
         if(map.has(REALPLAYER)) addRealPlayerCheck(map);
         if(map.has(FAKEPLAYER)) addFakePlayerCheck(map);
@@ -667,6 +670,22 @@ public class GenericRuleEvaluator<T> {
                 else return true;
             });
         }
+    }
+
+    private void addGameruleCheck(AttributeMap map) {
+        String json = map.get(GAMERULE);
+        GameruleInfo info = parseGameruleInfo(json);
+
+        if(info == null) {
+            logger.log(Level.ERROR, "Invalid gamerule entry '{}'!", json);
+            return;
+        }
+
+        checks.add((event, query) -> {
+            GameRules gamerules = query.getWorld(event).getGameRules();
+            int value = gamerules.getInt(info.rule);
+            return value >= info.minValue && value <= info.maxValue;
+        });
     }
     
     private void addRealPlayerCheck(AttributeMap map) {
@@ -1198,7 +1217,56 @@ public class GenericRuleEvaluator<T> {
         }
         return nbtMatchers;
     }
-    
+
+    private static class GameruleInfo {
+        private String rule;
+        private int minValue = Integer.MIN_VALUE;
+        private int maxValue = Integer.MAX_VALUE;
+
+        public GameruleInfo() { }
+
+        public GameruleInfo setRule(String rule){
+            this.rule = rule;
+            return this;
+        }
+
+        public GameruleInfo setMinValue(int minValue){
+            this.minValue = minValue;
+            return this;
+        }
+
+        public GameruleInfo setMaxValue(int maxValue){
+            this.maxValue = maxValue;
+            return this;
+        }
+    }
+
+
+    @Nullable
+    private GameruleInfo parseGameruleInfo(String json) {
+        JsonParser parser = new JsonParser();
+        JsonElement element = parser.parse(json);
+
+        if(!element.isJsonObject()){
+            InControl.setup.getLogger().log(Level.ERROR, "GameRule description '{}' is not valid!", json);
+            return null;
+        }
+
+        JsonObject obj = element.getAsJsonObject();
+
+        String rule = obj.get("rule").getAsString();
+        GameruleInfo info = new GameruleInfo().setRule(rule);
+        if(obj.get("minvalue").isJsonPrimitive()){
+            int minvalue = obj.get("minvalue").getAsInt();
+            info.setMinValue(minvalue);
+        }
+        if(obj.get("maxvalue").isJsonPrimitive()){
+            int maxvalue = obj.get("maxvalue").getAsInt();
+            info.setMaxValue(maxvalue);
+        }
+        return info;
+    }
+
     private static class CountInfo {
         private final List<Class<? extends Entity>> entityClass = new ArrayList<>();
         private int amount;

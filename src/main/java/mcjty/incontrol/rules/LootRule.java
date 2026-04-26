@@ -173,6 +173,7 @@ public class LootRule extends RuleBase<RuleBase.EventGetter> {
                 
                 //canspawnhere
                 //notcolliding
+                .attribute(Attribute.create(GAMERULE))
                 .attribute(Attribute.create(REALPLAYER))
                 .attribute(Attribute.create(FAKEPLAYER))
                 .attribute(Attribute.createMulti(MOD))
