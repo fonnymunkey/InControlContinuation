@@ -17,16 +17,21 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
+import net.minecraft.entity.monster.EntityEnderman;
+import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent;
 import net.minecraftforge.fml.common.eventhandler.Event;
+import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -256,6 +261,7 @@ public class SpawnRule extends RuleBase<RuleBase.EventGetter> {
                 .attribute(Attribute.create(ACTION_MOBNBT))
                 .attribute(Attribute.create(ACTION_CUSTOMNAME))
                 .attribute(Attribute.createMulti(ACTION_HELDITEM))
+                .attribute(Attribute.createMulti(ACTION_HELDITEMOFFHAND))
                 .attribute(Attribute.createMulti(ACTION_ARMORBOOTS))
                 .attribute(Attribute.createMulti(ACTION_ARMORLEGS))
                 .attribute(Attribute.createMulti(ACTION_ARMORCHEST))
@@ -310,6 +316,8 @@ public class SpawnRule extends RuleBase<RuleBase.EventGetter> {
         if(map.has(ACTION_ARMORTOUGHNESSMULTIPLY) || map.has(ACTION_ARMORTOUGHNESSADD)) addArmorToughnessAction(map);
         
         if(map.has(ACTION_SOURCE_MODIFIERS)) addSourceModifiers(map);
+        
+        if(map.has(ACTION_HELDITEMOFFHAND)) addHeldItemOffhand(map);
         
         if(map.has(ACTION_RESULT)) {
             String br = map.get(ACTION_RESULT);
@@ -416,6 +424,42 @@ public class SpawnRule extends RuleBase<RuleBase.EventGetter> {
                     }
                 });
             }
+        }
+    }
+    
+    private void addHeldItemOffhand(AttributeMap map) {
+        final List<Pair<Float, ItemStack>> items = getItemsWeighted(map.getList(ACTION_HELDITEM));
+        if(items.isEmpty()) return;
+        if(items.size() == 1) {
+            ItemStack item = items.get(0).getRight();
+            actions.add(event -> {
+                EntityLivingBase entityLiving = event.getEntityLiving();
+                if(entityLiving != null) {
+                    if(entityLiving instanceof EntityEnderman) {
+                        if(item.getItem() instanceof ItemBlock) {
+                            ItemBlock b = (ItemBlock)item.getItem();
+                            ((EntityEnderman) entityLiving).setHeldBlockState(b.getBlock().getStateFromMeta(b.getMetadata(item.getItemDamage())));
+                        }
+                    }
+                    else entityLiving.setHeldItem(EnumHand.OFF_HAND, item.copy());
+                }
+            });
+        }
+        else {
+            final float total = getTotal(items);
+            actions.add(event -> {
+                EntityLivingBase entityLiving = event.getEntityLiving();
+                if(entityLiving != null) {
+                    ItemStack item = getRandomItem(items, total);
+                    if(entityLiving instanceof EntityEnderman) {
+                        if(item.getItem() instanceof ItemBlock) {
+                            ItemBlock b = (ItemBlock) item.getItem();
+                            ((EntityEnderman) entityLiving).setHeldBlockState(b.getBlock().getStateFromMeta(b.getMetadata(item.getItemDamage())));
+                        }
+                    }
+                    else entityLiving.setHeldItem(EnumHand.OFF_HAND, item.copy());
+                }
+            });
         }
     }
 

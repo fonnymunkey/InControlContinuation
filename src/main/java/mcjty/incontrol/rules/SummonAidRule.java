@@ -197,6 +197,7 @@ public class SummonAidRule extends RuleBase<SummonEventGetter> {
                 //.attribute(Attribute.create(ACTION_SIZEADD))
                 .attribute(Attribute.create(ACTION_ANGRY))
                 .attribute(Attribute.createMulti(ACTION_HELDITEM))
+                .attribute(Attribute.createMulti(ACTION_HELDITEMOFFHAND))
                 .attribute(Attribute.createMulti(ACTION_ARMORBOOTS))
                 .attribute(Attribute.createMulti(ACTION_ARMORLEGS))
                 .attribute(Attribute.createMulti(ACTION_ARMORCHEST))
@@ -239,6 +240,7 @@ public class SummonAidRule extends RuleBase<SummonEventGetter> {
         if(map.has(ACTION_DAMAGEMULTIPLY) || map.has(ACTION_DAMAGEADD)) addDamageAction(map);
         if(map.has(ACTION_ANGRY)) addAngryAction(map);
         if(map.has(ACTION_HELDITEM)) addHeldItem(map);
+        if(map.has(ACTION_HELDITEMOFFHAND)) addHeldItemOffhand(map);
         if(map.has(ACTION_ARMORBOOTS)) addArmorItem(map, ACTION_ARMORBOOTS, EntityEquipmentSlot.FEET);
         if(map.has(ACTION_ARMORLEGS)) addArmorItem(map, ACTION_ARMORLEGS, EntityEquipmentSlot.LEGS);
         if(map.has(ACTION_ARMORHELMET)) addArmorItem(map, ACTION_ARMORHELMET, EntityEquipmentSlot.HEAD);
@@ -318,6 +320,26 @@ public class SummonAidRule extends RuleBase<SummonEventGetter> {
                 ItemStack item = getRandomItem(items, total);
                 EntityZombie helper = event.getZombieHelper();
                 helper.setHeldItem(EnumHand.MAIN_HAND, item.copy());
+            });
+        }
+    }
+    
+    private void addHeldItemOffhand(AttributeMap map) {
+        List<Pair<Float, ItemStack>> items = getItemsWeighted(map.getList(ACTION_HELDITEMOFFHAND));
+        if(items.isEmpty()) return;
+        if(items.size() == 1) {
+            Pair<Float, ItemStack> pair = items.get(0);
+            actions.add(event -> {
+                EntityZombie helper = event.getZombieHelper();
+                helper.setHeldItem(EnumHand.OFF_HAND, pair.getRight().copy());
+            });
+        }
+        else {
+            final float total = getTotal(items);
+            actions.add(event -> {
+                ItemStack item = getRandomItem(items, total);
+                EntityZombie helper = event.getZombieHelper();
+                helper.setHeldItem(EnumHand.OFF_HAND, item.copy());
             });
         }
     }
