@@ -11,6 +11,7 @@ import mcjty.tools.typed.Attribute;
 import mcjty.tools.typed.AttributeMap;
 import mcjty.tools.typed.GenericAttributeMapFactory;
 import mcjty.tools.typed.Key;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -203,6 +204,7 @@ public class SummonAidRule extends RuleBase<SummonEventGetter> {
                 .attribute(Attribute.createMulti(ACTION_ARMORCHEST))
                 .attribute(Attribute.createMulti(ACTION_ARMORHELMET))
                 .attribute(Attribute.createMulti(ACTION_POTION))
+                .attribute(Attribute.create(ACTION_ENCHANTDIFFICULTY))
         ;
     }
 
@@ -246,6 +248,7 @@ public class SummonAidRule extends RuleBase<SummonEventGetter> {
         if(map.has(ACTION_ARMORHELMET)) addArmorItem(map, ACTION_ARMORHELMET, EntityEquipmentSlot.HEAD);
         if(map.has(ACTION_ARMORCHEST)) addArmorItem(map, ACTION_ARMORCHEST, EntityEquipmentSlot.CHEST);
         if(map.has(ACTION_POTION)) addPotionsAction(map);
+        if(map.has(ACTION_ENCHANTDIFFICULTY)) addEnchantDifficultyAction(map);
     }
 
     private void addPotionsAction(AttributeMap map) {
@@ -340,6 +343,32 @@ public class SummonAidRule extends RuleBase<SummonEventGetter> {
                 ItemStack item = getRandomItem(items, total);
                 EntityZombie helper = event.getZombieHelper();
                 helper.setHeldItem(EnumHand.OFF_HAND, item.copy());
+            });
+        }
+    }
+    
+    private void addEnchantDifficultyAction(AttributeMap map) {
+        boolean ench = map.has(ACTION_ENCHANTDIFFICULTY) ? map.get(ACTION_ENCHANTDIFFICULTY) : false;
+        if(ench) {
+            actions.add(event -> {
+                EntityLivingBase entityLiving = event.getZombieHelper();
+                if(entityLiving != null) {
+                    float f = entityLiving.world.getDifficultyForLocation(new BlockPos(entityLiving)).getClampedAdditionalDifficulty();
+                    if(!entityLiving.getHeldItemMainhand().isEmpty() && entityLiving.getRNG().nextFloat() < 0.25F * f) {
+                        entityLiving.setItemStackToSlot(EntityEquipmentSlot.MAINHAND, EnchantmentHelper.addRandomEnchantment(entityLiving.getRNG(), entityLiving.getHeldItemMainhand(), (int)(5.0F + f * (float)entityLiving.getRNG().nextInt(18)), false));
+                    }
+                    if(!entityLiving.getHeldItemOffhand().isEmpty() && entityLiving.getRNG().nextFloat() < 0.25F * f) {
+                        entityLiving.setItemStackToSlot(EntityEquipmentSlot.OFFHAND, EnchantmentHelper.addRandomEnchantment(entityLiving.getRNG(), entityLiving.getHeldItemOffhand(), (int)(5.0F + f * (float)entityLiving.getRNG().nextInt(18)), false));
+                    }
+                    for(EntityEquipmentSlot entityequipmentslot : EntityEquipmentSlot.values()) {
+                        if(entityequipmentslot.getSlotType() == EntityEquipmentSlot.Type.ARMOR) {
+                            ItemStack itemstack = entityLiving.getItemStackFromSlot(entityequipmentslot);
+                            if(!itemstack.isEmpty() && entityLiving.getRNG().nextFloat() < 0.5F * f) {
+                                entityLiving.setItemStackToSlot(entityequipmentslot, EnchantmentHelper.addRandomEnchantment(entityLiving.getRNG(), itemstack, (int)(5.0F + f * (float)entityLiving.getRNG().nextInt(18)), false));
+                            }
+                        }
+                    }
+                }
             });
         }
     }

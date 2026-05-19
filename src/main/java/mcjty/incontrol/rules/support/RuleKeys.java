@@ -72,6 +72,7 @@ public interface RuleKeys extends CommonRuleKeys {
     Key<Float> ACTION_ARMORTOUGHNESSADD = Key.create(Type.FLOAT, "armortoughnessadd");
     
     Key<String> ACTION_HELDITEMOFFHAND = Key.create(Type.JSON, "helditemoffhand");
+    Key<Boolean> ACTION_ENCHANTDIFFICULTY = Key.create(Type.BOOLEAN, "enchantdifficulty");
     
     Key<AttributeMap> ACTION_SOURCE_MODIFIERS = Key.create(Type.MAP, "sourcemodifiers");
     Key<String> SOURCE_NAME = Key.create(Type.STRING, "name");
