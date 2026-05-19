@@ -3,7 +3,6 @@ plugins {
     id 'idea'
     id 'net.minecraftforge.gradle' version "${forge_gradle_version}"
     id 'org.spongepowered.mixin' version "${mixin_gradle_version}"
-    id 'com.github.johnrengelman.shadow' version "${shadow_gradle_version}"
 }
 
 version = mod_version
@@ -29,11 +28,13 @@ repositories {
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    shadow "org.spongepowered:mixin:${mixin_version}"
+    implementation "org.spongepowered:mixin:${mixin_version}"
     annotationProcessor "org.spongepowered:mixin:${mixin_version}:processor"
-    shadow "io.github.llamalad7:mixinextras-common:${mixin_extras_version}"
+    implementation "io.github.llamalad7:mixinextras-common:${mixin_extras_version}"
     annotationProcessor "io.github.llamalad7:mixinextras-common:${mixin_extras_version}"
-	
+
+    implementation fg.deobf("curse.maven:fermiumbooter-${fermiumbooter_version}")
+
 	implementation fg.deobf("com.github.mcjty:mcjtytools:${mcjtytools_version}")
 	embed ("com.github.mcjty:mcjtytools:${mcjtytools_version}")
     compileOnly fg.deobf("curse.maven:baubles-${baubles_version}")
@@ -66,35 +67,6 @@ processResources {
     }
 }
 
-//Gross but shadow is annoying
-tasks.register('mergeJar', Jar) {
-    from configurations.embed
-    destinationDirectory = file 'build/temp'
-    archiveBaseName = 'temp'
-}
-
-shadowJar {
-    dependsOn mergeJar
-
-    configurations = [project.configurations.shadow]
-    mergeServiceFiles()
-
-    exclude 'org/spongepowered/asm/launch/MixinLaunchPlugin*'
-    exclude 'org/spongepowered/asm/launch/MixinTransformationService*'
-    exclude 'org/spongepowered/asm/launch/platform/container/ContainerHandleModLauncherEx*'
-
-    archiveClassifier.set('')
-
-    from mergeJar {
-        into '/META-INF/libraries'
-    }
-    exclude 'META-INF/libraries/META-INF', 'META-INF/libraries/META-INF/**'
-}
-
-reobf {
-    shadowJar {}
-}
-
 jar {
     manifest {
         attributes([
@@ -122,13 +94,10 @@ jar {
             }
         }
     }
-	
-    archiveClassifier.set('THIN')
 
     into('/META-INF/libraries') {
         from configurations.embed
     }
 }
 
-build.dependsOn(shadowJar)
 jar.finalizedBy('reobfJar')

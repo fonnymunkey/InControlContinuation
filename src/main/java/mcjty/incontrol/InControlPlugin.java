@@ -1,9 +1,9 @@
 package mcjty.incontrol;
 
 import com.llamalad7.mixinextras.MixinExtrasBootstrap;
+import fermiumbooter.FermiumRegistryAPI;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
 import org.spongepowered.asm.launch.MixinBootstrap;
-import org.spongepowered.asm.mixin.Mixins;
 
 import java.util.Map;
 
@@ -14,7 +14,9 @@ public class InControlPlugin implements IFMLLoadingPlugin {
 	public InControlPlugin() {
 		MixinBootstrap.init();
 		MixinExtrasBootstrap.init();
-		Mixins.addConfiguration("mixins.incontrol.vanilla.json");
+		
+		FermiumRegistryAPI.enqueueMixin(false, "mixins.incontrol.vanilla.json");
+		FermiumRegistryAPI.enqueueMixin(true, "mixins.incontrol.mcjtytools.json");
 	}
 	
 	@Override

@@ -12,7 +12,7 @@ import net.minecraftforge.fml.common.event.*;
 
 @Mod(modid = InControl.MODID, name = InControl.MODNAME,
         dependencies =
-                "after:forge@[" + InControl.MIN_FORGE11_VER + ",)",
+                "after:forge@[" + InControl.MIN_FORGE11_VER + ",);required-after:fermiumbooter",
         version = InControl.VERSION,
         acceptedMinecraftVersions = "[1.12,1.13)",
         acceptableRemoteVersions = "*")
