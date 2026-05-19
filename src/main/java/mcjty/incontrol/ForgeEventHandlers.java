@@ -1,5 +1,6 @@
 package mcjty.incontrol;
 
+import mcjty.incontrol.config.GeneralConfiguration;
 import mcjty.incontrol.mixin.BiomeAccessor;
 import mcjty.incontrol.rules.*;
 import net.minecraft.entity.EntityLiving;
@@ -94,11 +95,7 @@ public class ForgeEventHandlers {
                     event.setResult(result);
                 }
                 if (result != Event.Result.DENY) {
-                    if(!rule.isOnJoin()) rule.action(event);
-                    else if(!event.getEntity().getEntityData().getBoolean("incontrol:onjoinaction")) {
-                        event.getEntity().getEntityData().setBoolean("incontrol:onjoinaction", true);
-                        rule.action(event);
-                    }
+                    if(!rule.isOnJoin() || !GeneralConfiguration.ON_JOIN_ENFORCEMENT) rule.action(event);
                 }
                 return;
             }
