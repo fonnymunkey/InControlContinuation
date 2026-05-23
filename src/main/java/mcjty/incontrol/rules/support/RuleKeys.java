@@ -14,6 +14,7 @@ public interface RuleKeys extends CommonRuleKeys {
     Key<Float> MAXPLAYERDIST = Key.create(Type.FLOAT, "maxplayerdist");
     Key<Boolean> CANSPAWNHERE = Key.create(Type.BOOLEAN, "canspawnhere");
     Key<Boolean> NOTCOLLIDING = Key.create(Type.BOOLEAN, "notcolliding");
+    Key<String> GAMERULE = Key.create(Type.JSON, "gamerule");
     Key<Boolean> PASSIVE = Key.create(Type.BOOLEAN, "passive");
     Key<Boolean> HOSTILE = Key.create(Type.BOOLEAN, "hostile");
     Key<String> MOB = Key.create(Type.STRING, "mob");

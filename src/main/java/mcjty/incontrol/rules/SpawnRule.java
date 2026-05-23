@@ -230,6 +230,7 @@ public class SpawnRule extends RuleBase<RuleBase.EventGetter> {
                 
                 .attribute(Attribute.create(CANSPAWNHERE))
                 .attribute(Attribute.create(NOTCOLLIDING))
+                .attribute(Attribute.create(GAMERULE))
                 //realplayer
                 //fakeplayer
                 .attribute(Attribute.createMulti(MOD))

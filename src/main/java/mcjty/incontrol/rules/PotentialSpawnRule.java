@@ -171,6 +171,8 @@ public class PotentialSpawnRule extends RuleBase<RuleBase.EventGetter> {
                 
                 //canspawnhere
                 //notcolliding
+
+                .attribute(Attribute.create(GAMERULE))
                 //realplayer
                 //fakeplayer
                 //mod
