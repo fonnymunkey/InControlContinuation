@@ -433,7 +433,7 @@ public class SpawnRule extends RuleBase<RuleBase.EventGetter> {
     }
     
     private void addHeldItemOffhand(AttributeMap map) {
-        final List<Pair<Float, ItemStack>> items = getItemsWeighted(map.getList(ACTION_HELDITEM));
+        final List<Pair<Float, ItemStack>> items = getItemsWeighted(map.getList(ACTION_HELDITEMOFFHAND));
         if(items.isEmpty()) return;
         if(items.size() == 1) {
             ItemStack item = items.get(0).getRight();
