@@ -39,6 +39,7 @@ public class ForgeEventHandlers {
         if (event.getWorld().isRemote) {
             return;
         }
+        boolean actioned = false;
         for (SpawnRule rule : RulesManager.rules) {
             if (rule.isOnJoin() && rule.match(event)) {
                 Event.Result result = rule.getResult();
@@ -49,16 +50,18 @@ public class ForgeEventHandlers {
                 }
                 if (result != Event.Result.DENY) {
                     if(!event.getEntity().getEntityData().getBoolean("incontrol:onjoinaction")) {
-                        event.getEntity().getEntityData().setBoolean("incontrol:onjoinaction", true);
+                        actioned = true;
                         rule.action(event);
                     }
+                    if(!GeneralConfiguration.FIRST_MATCH_ONLY) continue;
                 } else {
                     event.setCanceled(true);
                 }
-                return;
+                break;
             }
             i++;
         }
+        if(actioned) event.getEntity().getEntityData().setBoolean("incontrol:onjoinaction", true);
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -96,6 +99,7 @@ public class ForgeEventHandlers {
                 }
                 if (result != Event.Result.DENY) {
                     if(!rule.isOnJoin() || !GeneralConfiguration.ON_JOIN_ENFORCEMENT) rule.action(event);
+                    if(!GeneralConfiguration.FIRST_MATCH_ONLY) continue;
                 }
                 return;
             }
@@ -118,6 +122,7 @@ public class ForgeEventHandlers {
                 event.setResult(result);
                 if (result != Event.Result.DENY) {
                     rule.action(event);
+                    if(!GeneralConfiguration.FIRST_MATCH_ONLY) continue;
                 }
                 return;
             }
