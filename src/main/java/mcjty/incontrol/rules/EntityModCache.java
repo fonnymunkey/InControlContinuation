@@ -1,7 +1,7 @@
 package mcjty.incontrol.rules;
 
-import mcjty.tools.varia.Tools;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityList;
 import net.minecraft.util.ResourceLocation;
 
 import java.util.HashMap;
